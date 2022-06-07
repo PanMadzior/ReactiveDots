@@ -29,11 +29,16 @@ namespace ReactiveDotsPlugin
 
         private void GenerateReactiveSystem( GeneratorExecutionContext context, ReactiveSystemInfo reactiveSystem )
         {
-            var globalTemplate           = ReactiveSystemTemplates.GetGlobalTemplate();
-            var reactiveUpdatesInsert    = string.Empty;
-            var reactiveComponentsInsert = string.Empty;
+            var globalTemplate                    = ReactiveSystemTemplates.GetGlobalTemplate();
+            var reactiveUpdatesChangedInsert      = string.Empty;
+            var reactiveUpdatesAddedRemovedInsert = string.Empty;
+            var reactiveComponentsInsert          = string.Empty;
             for ( int i = 0; i < reactiveSystem.ReactiveAttributes.Count; i++ ) {
-                reactiveUpdatesInsert += "\n" + ReplaceKeywords( ReactiveSystemTemplates.GetTemplateForSystemUpdate(),
+                reactiveUpdatesAddedRemovedInsert += "\n" + ReplaceKeywords(
+                    ReactiveSystemTemplates.GetTemplateForSystemUpdateAddedRemoved(),
+                    reactiveSystem, i );
+                reactiveUpdatesChangedInsert += "\n" + ReplaceKeywords(
+                    ReactiveSystemTemplates.GetTemplateForSystemUpdate(),
                     reactiveSystem, i );
                 reactiveComponentsInsert += "\n" + ReplaceKeywords( ReactiveSystemTemplates.GetTemplateForComponent(),
                     reactiveSystem, i );
@@ -43,7 +48,8 @@ namespace ReactiveDotsPlugin
                 .Replace( "NAMESPACENAME", reactiveSystem.SystemNamespace )
                 .Replace( "SYSNAMEFULL", reactiveSystem.SystemNameFull )
                 .Replace( "SYSNAME", reactiveSystem.SystemName )
-                .Replace( "PLACE_FOR_UPDATES", reactiveUpdatesInsert )
+                .Replace( "PLACE_FOR_UPDATES_ADDED_REMOVED", reactiveUpdatesAddedRemovedInsert )
+                .Replace( "PLACE_FOR_UPDATES_CHANGED", reactiveUpdatesChangedInsert )
                 .Replace( "PLACE_FOR_COMPONENTS", reactiveComponentsInsert );
             context.AddSource( $"{reactiveSystem.SystemName}.Reactive.g.cs", SourceText.From( source, Encoding.UTF8 ) );
         }

@@ -21,7 +21,6 @@ namespace ReactiveDotsSample
         protected override void OnUpdate()
         {
             Dependency = this.UpdateReactive( Dependency );
-            Dependency.Complete();
 
             Entities.ForEach( ( ref Bounces points, in MoveDirectionReactive moveDirReactive,
                 in BouncesReactive bouncesReactive ) =>

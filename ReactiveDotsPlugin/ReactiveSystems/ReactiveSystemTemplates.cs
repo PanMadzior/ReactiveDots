@@ -42,12 +42,16 @@
             return data;
         }
 
-        public static Unity.Jobs.JobHandle UpdateReactive( SYSNAMEFULL sys,
-            Unity.Jobs.JobHandle dependency )
+        public static void UpdateReactiveAddedRemoved( SYSNAMEFULL sys )
         {
             var instanceData = GetOrCreateInstanceData( sys );
             UpdateAdded( sys, instanceData );
             UpdateRemoved( sys, instanceData );
+        }
+
+        public static Unity.Jobs.JobHandle UpdateReactive( SYSNAMEFULL sys,
+            Unity.Jobs.JobHandle dependency )
+        {
             return GetReactiveUpdateJob( sys, out var query ).ScheduleParallel( query, dependency );
         }
 
@@ -152,13 +156,19 @@ namespace NAMESPACENAME
     {
         public static Unity.Jobs.JobHandle UpdateReactive( this SYSNAMEFULL sys,
             Unity.Jobs.JobHandle dependency )
-        {PLACE_FOR_UPDATES
+        {PLACE_FOR_UPDATES_ADDED_REMOVED
+PLACE_FOR_UPDATES_CHANGED
             return dependency;
         }
     }
 PLACE_FOR_COMPONENTS
 }
 ";
+        }
+
+        public static string GetTemplateForSystemUpdateAddedRemoved()
+        {
+            return "            SYSNAME_COMPNAME_Reactive.UpdateReactiveAddedRemoved( sys );";
         }
 
         public static string GetTemplateForSystemUpdate()
