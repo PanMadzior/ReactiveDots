@@ -3,10 +3,10 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace DotsGenerator
+namespace ReactiveDotsPlugin
 {
-    [Generator]
-    public class ReactiveSystemGenerator : ISourceGenerator
+    //[Generator]
+    public class ReactiveSystemGeneratorOld// : ISourceGenerator
     {
         private const string AttributeName = "ReactiveSystem";
 
@@ -29,13 +29,13 @@ namespace DotsGenerator
                         .Where( a => a.Name.GetText().ToString() == AttributeName )
                         .ToList();
                     foreach ( var reactiveAttribute in reactiveAttributes ) {
-                        var namespaceName = GeneratorUtils.GetNamespaceFrom( cds );
+                        var namespaceName = GeneratorUtilsOld.GetNamespaceFrom( cds );
                         var systemName    = cds.Identifier.Text;
 
                         var compTypeName     = GetComponentTypeString( reactiveAttribute );
                         var compTypeNameFull = $"{namespaceName}.{compTypeName}";
-                        if ( GeneratorUtils.FindStruct( context, compTypeName, out var compSyntax ) )
-                            compTypeNameFull = GeneratorUtils.GetFullName( compSyntax );
+                        if ( GeneratorUtilsOld.FindStruct( context, compTypeName, out var compSyntax ) )
+                            compTypeNameFull = GeneratorUtilsOld.GetFullName( compSyntax );
 
                         var reactiveTypeName     = GetReactiveComponentTypeString( reactiveAttribute );
                         var reactiveTypeNameFull = $"{namespaceName}.{systemName}.{reactiveTypeName}";
