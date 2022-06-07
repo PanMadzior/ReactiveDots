@@ -2,17 +2,10 @@
 {
     public static class ReactiveSystemTemplates
     {
-        public static string GetReactiveSystemTemplate()
+        public static string GetTemplateForComponent()
         {
-            return @"// Auto Generated Code
-using System.Collections.Generic;
-using Unity.Collections;
-using Unity.Entities;
-using ReactiveDots;
-
-namespace NAMESPACENAME
-{
-    public static class SYSNAME_Reactive
+            return @"
+    public static class SYSNAME_COMPNAME_Reactive
     {
         private struct InstanceData
         {
@@ -21,17 +14,17 @@ namespace NAMESPACENAME
             public EntityQuery changedQuery;
         }
 
-        private static Dictionary<SYSNAME, InstanceData> Instances =
-            new Dictionary<SYSNAME, InstanceData>();
+        private static Dictionary<SYSNAMEFULL, InstanceData> Instances =
+            new Dictionary<SYSNAMEFULL, InstanceData>();
 
-        private static InstanceData GetOrCreateInstanceData( SYSNAME sys )
+        private static InstanceData GetOrCreateInstanceData( SYSNAMEFULL sys )
         {
             if ( !Instances.ContainsKey( sys ) )
                 Instances.Add( sys, CreateInstanceData( sys ) );
             return Instances[sys];
         }
 
-        private static InstanceData CreateInstanceData( SYSNAME sys )
+        private static InstanceData CreateInstanceData( SYSNAMEFULL sys )
         {
             var data = new InstanceData();
             data.addedQuery = sys.EntityManager.CreateEntityQuery(
@@ -49,7 +42,7 @@ namespace NAMESPACENAME
             return data;
         }
 
-        public static Unity.Jobs.JobHandle UpdateReactive( this SYSNAME sys,
+        public static Unity.Jobs.JobHandle UpdateReactive( SYSNAMEFULL sys,
             Unity.Jobs.JobHandle dependency )
         {
             var instanceData = GetOrCreateInstanceData( sys );
@@ -58,7 +51,7 @@ namespace NAMESPACENAME
             return GetReactiveUpdateJob( sys, out var query ).ScheduleParallel( query, dependency );
         }
 
-        private static void UpdateAdded( SYSNAME sys, InstanceData instanceData )
+        private static void UpdateAdded( SYSNAMEFULL sys, InstanceData instanceData )
         {
             var addedEntities = instanceData.addedQuery.ToEntityArray( Allocator.Temp );
             foreach ( var e in addedEntities ) {
@@ -76,7 +69,7 @@ namespace NAMESPACENAME
             addedEntities.Dispose();
         }
 
-        private static void UpdateRemoved( SYSNAME sys, InstanceData instanceData )
+        private static void UpdateRemoved( SYSNAMEFULL sys, InstanceData instanceData )
         {
             var removedEntities = instanceData.removedQuery.ToEntityArray( Allocator.Temp );
             foreach ( var e in removedEntities ) {
@@ -95,7 +88,7 @@ namespace NAMESPACENAME
             removedEntities.Dispose();
         }
 
-        private static ReactiveUpdateJob GetReactiveUpdateJob( this SYSNAME sys,
+        private static ReactiveUpdateJob GetReactiveUpdateJob( SYSNAMEFULL sys,
             out EntityQuery query )
         {
             var instanceData = GetOrCreateInstanceData( sys );
@@ -142,8 +135,35 @@ namespace NAMESPACENAME
             }
         }
     }
+";
+        }
+        
+        public static string GetGlobalTemplate()
+        {
+            return @"// Auto Generated Code
+using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Entities;
+using ReactiveDots;
+
+namespace NAMESPACENAME
+{
+    public static class SYSNAME_Reactive
+    {
+        public static Unity.Jobs.JobHandle UpdateReactive( this SYSNAMEFULL sys,
+            Unity.Jobs.JobHandle dependency )
+        {PLACE_FOR_UPDATES
+            return dependency;
+        }
+    }
+PLACE_FOR_COMPONENTS
 }
 ";
+        }
+
+        public static string GetTemplateForSystemUpdate()
+        {
+            return "            dependency = SYSNAME_COMPNAME_Reactive.UpdateReactive( sys, dependency );";
         }
     }
 }

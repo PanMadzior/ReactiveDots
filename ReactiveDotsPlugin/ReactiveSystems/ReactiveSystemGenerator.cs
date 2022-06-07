@@ -29,16 +29,34 @@ namespace ReactiveDotsPlugin
 
         private void GenerateReactiveSystem( GeneratorExecutionContext context, ReactiveSystemInfo reactiveSystem )
         {
-            // TODO: add support for multi reactive system (now it is only first attribute generation)
-            var template = ReactiveSystemTemplates.GetReactiveSystemTemplate();
-            var source = template // order matters
+            var globalTemplate           = ReactiveSystemTemplates.GetGlobalTemplate();
+            var reactiveUpdatesInsert    = string.Empty;
+            var reactiveComponentsInsert = string.Empty;
+            for ( int i = 0; i < reactiveSystem.ReactiveAttributes.Count; i++ ) {
+                reactiveUpdatesInsert += "\n" + ReplaceKeywords( ReactiveSystemTemplates.GetTemplateForSystemUpdate(),
+                    reactiveSystem, i );
+                reactiveComponentsInsert += "\n" + ReplaceKeywords( ReactiveSystemTemplates.GetTemplateForComponent(),
+                    reactiveSystem, i );
+            }
+
+            var source = globalTemplate
                 .Replace( "NAMESPACENAME", reactiveSystem.SystemNamespace )
+                .Replace( "SYSNAMEFULL", reactiveSystem.SystemNameFull )
                 .Replace( "SYSNAME", reactiveSystem.SystemName )
-                .Replace( "COMPNAME", reactiveSystem.ReactiveAttributes[0].ComponentName )
-                .Replace( "RCOMPONENTFULL", reactiveSystem.ReactiveAttributes[0].ReactiveComponentNameFull )
-                .Replace( "COMPONENTFULL", reactiveSystem.ReactiveAttributes[0].ComponentNameFull )
-                .Replace( "VARIABLENAMETOCOMPARE", reactiveSystem.ReactiveAttributes[0].FieldToCompareName );
+                .Replace( "PLACE_FOR_UPDATES", reactiveUpdatesInsert )
+                .Replace( "PLACE_FOR_COMPONENTS", reactiveComponentsInsert );
             context.AddSource( $"{reactiveSystem.SystemName}.Reactive.g.cs", SourceText.From( source, Encoding.UTF8 ) );
+        }
+
+        private string ReplaceKeywords( string template, ReactiveSystemInfo systemInfo, int attributeIndex )
+        {
+            return template // order matters
+                .Replace( "SYSNAMEFULL", systemInfo.SystemNameFull )
+                .Replace( "SYSNAME", systemInfo.SystemName )
+                .Replace( "COMPNAME", systemInfo.ReactiveAttributes[attributeIndex].ComponentName )
+                .Replace( "RCOMPONENTFULL", systemInfo.ReactiveAttributes[attributeIndex].ReactiveComponentNameFull )
+                .Replace( "COMPONENTFULL", systemInfo.ReactiveAttributes[attributeIndex].ComponentNameFull )
+                .Replace( "VARIABLENAMETOCOMPARE", systemInfo.ReactiveAttributes[attributeIndex].FieldToCompareName );
         }
     }
 }
