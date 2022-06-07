@@ -138,8 +138,7 @@
                 };
             }
         }
-    }
-";
+    }";
         }
         
         public static string GetGlobalTemplate()
@@ -156,8 +155,7 @@ namespace NAMESPACENAME
     {
         public static Unity.Jobs.JobHandle UpdateReactive( this SYSNAMEFULL sys,
             Unity.Jobs.JobHandle dependency )
-        {PLACE_FOR_UPDATES_ADDED_REMOVED
-PLACE_FOR_UPDATES_CHANGED
+        { PLACE_FOR_UPDATES_ADDED_REMOVED PLACE_FOR_UPDATES_CHANGED
             return dependency;
         }
     }
