@@ -27,15 +27,15 @@
         private static InstanceData CreateInstanceData( SYSNAMEFULL sys )
         {
             var data = new InstanceData();
-            data.addedQuery = sys.EntityManager.CreateEntityQuery(
+            data.addedQuery = sys.CreateReactiveQuery(
                 ComponentType.ReadOnly<COMPONENTFULL>(),
                 ComponentType.Exclude<RCOMPONENTFULL>()
             );
-            data.removedQuery = sys.EntityManager.CreateEntityQuery(
+            data.removedQuery = sys.CreateReactiveQuery(
                 ComponentType.Exclude<COMPONENTFULL>(),
                 ComponentType.ReadWrite<RCOMPONENTFULL>()
             );
-            data.changedQuery = sys.EntityManager.CreateEntityQuery(
+            data.changedQuery = sys.CreateReactiveQuery(
                 ComponentType.ReadOnly<COMPONENTFULL>(),
                 ComponentType.ReadWrite<RCOMPONENTFULL>()
             );
@@ -160,6 +160,14 @@ namespace NAMESPACENAME
         }
     }
 PLACE_FOR_COMPONENTS
+    
+    public partial class SYSNAME
+    {
+        public EntityQuery CreateReactiveQuery( params ComponentType[] componentTypes )
+        {
+            return GetEntityQuery( componentTypes );
+        }
+    }
 }
 ";
         }
