@@ -46,6 +46,18 @@ namespace ReactiveDotsPlugin
             return structSyntax != null;
         }
 
+        public static bool TryFindClassSyntaxByName( GeneratorExecutionContext context, string className,
+            out ClassDeclarationSyntax? classSyntax )
+        {
+            classSyntax = context.Compilation.SyntaxTrees
+                .SelectMany( st => st
+                    .GetRoot()
+                    .DescendantNodes()
+                    .OfType<ClassDeclarationSyntax>() )
+                .FirstOrDefault( str => str.Identifier.Text.Equals( className ) ) ?? null;
+            return classSyntax != null;
+        }
+
         public static string GetNamespaceFor( SyntaxNode s )
         {
             return s.Parent switch {
@@ -85,6 +97,19 @@ namespace ReactiveDotsPlugin
                     return arg.NameEquals.Name.Identifier.ValueText.Equals( argumentName );
                 } );
             var argumentValue = "Value";
+            if ( argument != null )
+                argumentValue = argument.Expression.NormalizeWhitespace().ToFullString()
+                    .Replace( "\"", "" );
+            return argumentValue;
+        }
+
+        public static string GetAttributeArgumentValue( AttributeSyntax attribute, int argumentIndex,
+            string defaultValue )
+        {
+            if ( attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count <= argumentIndex )
+                return string.Empty;
+            var argument      = attribute.ArgumentList!.Arguments[argumentIndex];
+            var argumentValue = string.Empty;
             if ( argument != null )
                 argumentValue = argument.Expression.NormalizeWhitespace().ToFullString()
                     .Replace( "\"", "" );

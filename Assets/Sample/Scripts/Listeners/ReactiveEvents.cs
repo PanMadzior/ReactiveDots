@@ -1,7 +1,10 @@
 ﻿namespace ReactiveDots
 {
-    public partial class ReactiveEvents
+    public partial class EventSystem_2
     {
-        
+        public partial class ReactiveEvents
+        {
+            
+        }
     }
 }

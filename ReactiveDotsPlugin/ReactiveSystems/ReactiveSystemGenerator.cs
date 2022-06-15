@@ -45,24 +45,24 @@ namespace ReactiveDotsPlugin
             }
 
             var source = globalTemplate
-                .Replace( "NAMESPACENAME", reactiveSystem.SystemNamespace )
-                .Replace( "SYSNAMEFULL", reactiveSystem.SystemNameFull )
-                .Replace( "SYSNAME", reactiveSystem.SystemName )
-                .Replace( "PLACE_FOR_UPDATES_ADDED_REMOVED", reactiveUpdatesAddedRemovedInsert )
-                .Replace( "PLACE_FOR_UPDATES_CHANGED", reactiveUpdatesChangedInsert )
-                .Replace( "PLACE_FOR_COMPONENTS", reactiveComponentsInsert );
+                .Replace( "$$namespace$$", reactiveSystem.SystemNamespace )
+                .Replace( "$$systemNameFull$$", reactiveSystem.SystemNameFull )
+                .Replace( "$$systemName$$", reactiveSystem.SystemName )
+                .Replace( "$$placeForUpdatesAddedRemoved$$", reactiveUpdatesAddedRemovedInsert )
+                .Replace( "$$placeForUpdatesChanged$$", reactiveUpdatesChangedInsert )
+                .Replace( "$$placeForComponents$$", reactiveComponentsInsert );
             context.AddSource( $"{reactiveSystem.SystemName}.Reactive.g.cs", SourceText.From( source, Encoding.UTF8 ) );
         }
 
         private string ReplaceKeywords( string template, ReactiveSystemInfo systemInfo, int attributeIndex )
         {
-            return template // order matters
-                .Replace( "SYSNAMEFULL", systemInfo.SystemNameFull )
-                .Replace( "SYSNAME", systemInfo.SystemName )
-                .Replace( "COMPNAME", systemInfo.ReactiveAttributes[attributeIndex].ComponentName )
-                .Replace( "RCOMPONENTFULL", systemInfo.ReactiveAttributes[attributeIndex].ReactiveComponentNameFull )
-                .Replace( "COMPONENTFULL", systemInfo.ReactiveAttributes[attributeIndex].ComponentNameFull )
-                .Replace( "VARIABLENAMETOCOMPARE", systemInfo.ReactiveAttributes[attributeIndex].FieldToCompareName );
+            return template
+                .Replace( "$$systemNameFull$$", systemInfo.SystemNameFull )
+                .Replace( "$$systemName$$", systemInfo.SystemName )
+                .Replace( "$$componentName$$", systemInfo.ReactiveAttributes[attributeIndex].ComponentName )
+                .Replace( "$$componentNameFull$$", systemInfo.ReactiveAttributes[attributeIndex].ComponentNameFull )
+                .Replace( "$$reactiveComponentNameFull$$", systemInfo.ReactiveAttributes[attributeIndex].ReactiveComponentNameFull )
+                .Replace( "$$variableNameToCompare$$", systemInfo.ReactiveAttributes[attributeIndex].FieldToCompareName );
         }
     }
 }

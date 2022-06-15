@@ -5,7 +5,7 @@
         public static string GetTemplateForComponent()
         {
             return @"
-    public static class SYSNAME_COMPNAME_Reactive
+    public static class $$systemName$$_$$componentName$$_Reactive
     {
         private struct InstanceData
         {
@@ -14,54 +14,54 @@
             public EntityQuery changedQuery;
         }
 
-        private static Dictionary<SYSNAMEFULL, InstanceData> Instances =
-            new Dictionary<SYSNAMEFULL, InstanceData>();
+        private static Dictionary<$$systemNameFull$$, InstanceData> Instances =
+            new Dictionary<$$systemNameFull$$, InstanceData>();
 
-        private static InstanceData GetOrCreateInstanceData( SYSNAMEFULL sys )
+        private static InstanceData GetOrCreateInstanceData( $$systemNameFull$$ sys )
         {
             if ( !Instances.ContainsKey( sys ) )
                 Instances.Add( sys, CreateInstanceData( sys ) );
             return Instances[sys];
         }
 
-        private static InstanceData CreateInstanceData( SYSNAMEFULL sys )
+        private static InstanceData CreateInstanceData( $$systemNameFull$$ sys )
         {
             var data = new InstanceData();
             data.addedQuery = sys.CreateReactiveQuery(
-                ComponentType.ReadOnly<COMPONENTFULL>(),
-                ComponentType.Exclude<RCOMPONENTFULL>()
+                ComponentType.ReadOnly<$$componentNameFull$$>(),
+                ComponentType.Exclude<$$reactiveComponentNameFull$$>()
             );
             data.removedQuery = sys.CreateReactiveQuery(
-                ComponentType.Exclude<COMPONENTFULL>(),
-                ComponentType.ReadWrite<RCOMPONENTFULL>()
+                ComponentType.Exclude<$$componentNameFull$$>(),
+                ComponentType.ReadWrite<$$reactiveComponentNameFull$$>()
             );
             data.changedQuery = sys.CreateReactiveQuery(
-                ComponentType.ReadOnly<COMPONENTFULL>(),
-                ComponentType.ReadWrite<RCOMPONENTFULL>()
+                ComponentType.ReadOnly<$$componentNameFull$$>(),
+                ComponentType.ReadWrite<$$reactiveComponentNameFull$$>()
             );
             return data;
         }
 
-        public static void UpdateReactiveAddedRemoved( SYSNAMEFULL sys )
+        public static void UpdateReactiveAddedRemoved( $$systemNameFull$$ sys )
         {
             var instanceData = GetOrCreateInstanceData( sys );
             UpdateAdded( sys, instanceData );
             UpdateRemoved( sys, instanceData );
         }
 
-        public static Unity.Jobs.JobHandle UpdateReactive( SYSNAMEFULL sys,
+        public static Unity.Jobs.JobHandle UpdateReactive( $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
         {
             return GetReactiveUpdateJob( sys, out var query ).ScheduleParallel( query, dependency );
         }
 
-        private static void UpdateAdded( SYSNAMEFULL sys, InstanceData instanceData )
+        private static void UpdateAdded( $$systemNameFull$$ sys, InstanceData instanceData )
         {
             var addedEntities = instanceData.addedQuery.ToEntityArray( Allocator.Temp );
             foreach ( var e in addedEntities ) {
-                sys.EntityManager.AddComponentData( e, new RCOMPONENTFULL() {
-                    Value = new ComponentReactiveData<COMPONENTFULL>() {
-                        PreviousValue        = sys.EntityManager.GetComponentData<COMPONENTFULL>( e ),
+                sys.EntityManager.AddComponentData( e, new $$reactiveComponentNameFull$$() {
+                    Value = new ComponentReactiveData<$$componentNameFull$$>() {
+                        PreviousValue        = sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ),
                         Added                = true,
                         Changed              = true,
                         Removed              = false,
@@ -73,14 +73,14 @@
             addedEntities.Dispose();
         }
 
-        private static void UpdateRemoved( SYSNAMEFULL sys, InstanceData instanceData )
+        private static void UpdateRemoved( $$systemNameFull$$ sys, InstanceData instanceData )
         {
             var removedEntities = instanceData.removedQuery.ToEntityArray( Allocator.Temp );
             foreach ( var e in removedEntities ) {
-                var rComp = sys.EntityManager.GetComponentData<RCOMPONENTFULL>( e );
+                var rComp = sys.EntityManager.GetComponentData<$$reactiveComponentNameFull$$>( e );
                 var rCompData = rComp.Value;
                 if ( rCompData.Removed )
-                    sys.EntityManager.RemoveComponent<RCOMPONENTFULL>( e );
+                    sys.EntityManager.RemoveComponent<$$reactiveComponentNameFull$$>( e );
                 else {
                     rCompData.Added   = false;
                     rCompData.Changed = false;
@@ -92,14 +92,14 @@
             removedEntities.Dispose();
         }
 
-        private static ReactiveUpdateJob GetReactiveUpdateJob( SYSNAMEFULL sys,
+        private static ReactiveUpdateJob GetReactiveUpdateJob( $$systemNameFull$$ sys,
             out EntityQuery query )
         {
             var instanceData = GetOrCreateInstanceData( sys );
             query = instanceData.changedQuery;
             return new ReactiveUpdateJob() {
-                compHandle  = sys.GetComponentTypeHandle<COMPONENTFULL>( true ),
-                rCompHandle = sys.GetComponentTypeHandle<RCOMPONENTFULL>( false )
+                compHandle  = sys.GetComponentTypeHandle<$$componentNameFull$$>( true ),
+                rCompHandle = sys.GetComponentTypeHandle<$$reactiveComponentNameFull$$>( false )
             };
         }
 
@@ -107,8 +107,8 @@
         private struct ReactiveUpdateJob : IJobEntityBatch
         {
             [ReadOnly]
-            public ComponentTypeHandle<COMPONENTFULL> compHandle;
-            public ComponentTypeHandle<RCOMPONENTFULL> rCompHandle;
+            public ComponentTypeHandle<$$componentNameFull$$> compHandle;
+            public ComponentTypeHandle<$$reactiveComponentNameFull$$> rCompHandle;
 
             public void Execute( ArchetypeChunk batchInChunk, int batchIndex )
             {
@@ -119,20 +119,20 @@
                 for ( int i = 0; i < batchInChunk.Count; i++ ) {
                     Execute(
                         ref InternalCompilerInterface
-                            .UnsafeGetRefToNativeArrayPtrElement<COMPONENTFULL>( compsArrayPtr, i ),
+                            .UnsafeGetRefToNativeArrayPtrElement<$$componentNameFull$$>( compsArrayPtr, i ),
                         ref InternalCompilerInterface
-                            .UnsafeGetRefToNativeArrayPtrElement<RCOMPONENTFULL>(
+                            .UnsafeGetRefToNativeArrayPtrElement<$$reactiveComponentNameFull$$>(
                                 rCompArrayPtr, i ) 
                         );
                 }
             }
 
-            private static void Execute( ref COMPONENTFULL comp, ref RCOMPONENTFULL rComp )
+            private static void Execute( ref $$componentNameFull$$ comp, ref $$reactiveComponentNameFull$$ rComp )
             {
-                rComp.Value = new ComponentReactiveData<COMPONENTFULL>() {
+                rComp.Value = new ComponentReactiveData<$$componentNameFull$$>() {
                     PreviousValue        = comp,
                     Added                = !rComp.Value._FirstCheckCompleted,
-                    Changed              = rComp.Value.Added || BooleanSimplifier.Any( comp.VARIABLENAMETOCOMPARE != rComp.Value.PreviousValue.VARIABLENAMETOCOMPARE ),
+                    Changed              = rComp.Value.Added || BooleanSimplifier.Any( comp.$$variableNameToCompare$$ != rComp.Value.PreviousValue.$$variableNameToCompare$$ ),
                     Removed              = false,
                     _FirstCheckCompleted = true
                 };
@@ -149,19 +149,19 @@ using Unity.Collections;
 using Unity.Entities;
 using ReactiveDots;
 
-namespace NAMESPACENAME
+namespace $$namespace$$
 {
-    public static class SYSNAME_Reactive
+    public static class $$systemName$$_Reactive
     {
-        public static Unity.Jobs.JobHandle UpdateReactive( this SYSNAMEFULL sys,
+        public static Unity.Jobs.JobHandle UpdateReactive( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
-        { PLACE_FOR_UPDATES_ADDED_REMOVED PLACE_FOR_UPDATES_CHANGED
+        { $$placeForUpdatesAddedRemoved$$ $$placeForUpdatesChanged$$
             return dependency;
         }
     }
-PLACE_FOR_COMPONENTS
+$$placeForComponents$$
     
-    public partial class SYSNAME
+    public partial class $$systemName$$
     {
         public EntityQuery CreateReactiveQuery( params ComponentType[] componentTypes )
         {
@@ -174,12 +174,23 @@ PLACE_FOR_COMPONENTS
 
         public static string GetTemplateForSystemUpdateAddedRemoved()
         {
-            return "            SYSNAME_COMPNAME_Reactive.UpdateReactiveAddedRemoved( sys );";
+            return "            $$systemName$$_$$componentName$$_Reactive.UpdateReactiveAddedRemoved( sys );";
         }
 
         public static string GetTemplateForSystemUpdate()
         {
-            return "            dependency = SYSNAME_COMPNAME_Reactive.UpdateReactive( sys, dependency );";
+            return "            dependency = $$systemName$$_$$componentName$$_Reactive.UpdateReactive( sys, dependency );";
+        }
+
+        public static string GetTemplateForReactiveComponent()
+        {
+            return @"    public partial class $$systemName$$
+    {
+        public struct $$componentName$$Reactive : ISystemStateComponentData
+        {
+            public ComponentReactiveData<$$componentNameFull$$> Value;
+        }
+    }";
         }
     }
 }
