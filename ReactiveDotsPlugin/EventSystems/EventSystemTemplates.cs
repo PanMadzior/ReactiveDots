@@ -155,38 +155,49 @@ $$placeForReactiveComponent$$
         {
             var instanceData = GetOrCreateInstanceData( sys );
             var entities = instanceData.reactiveQuery.ToEntityArray( Allocator.Temp );
+
+            Any$$componentName$$AddedListener[]   addedListeners   = null;
+            Any$$componentName$$RemovedListener[] removedListeners = null;
+            Any$$componentName$$ChangedListener[] changedListeners = null;
+
             foreach ( var e in entities ) {
                 var reactiveData = sys.EntityManager.GetComponentData<$$reactiveComponentNameFull$$>( e );
-                if( reactiveData.Value.Added )
-                    FireAdded( sys, instanceData, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
-                if( reactiveData.Value.Removed )
-                    FireRemoved( sys, instanceData, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
-                if( reactiveData.Value.Changed )
-                    FireChanged( sys, instanceData, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
+                if( reactiveData.Value.Added ) {
+                    if( addedListeners == null )
+                        addedListeners = instanceData.anyAddedQuery.ToComponentDataArray<Any$$componentName$$AddedListener>();
+                    FireAdded( sys, addedListeners, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
+                }
+                if( reactiveData.Value.Removed ) {
+                    if( removedListeners == null )
+                        removedListeners = instanceData.anyRemovedQuery.ToComponentDataArray<Any$$componentName$$RemovedListener>();
+                    FireRemoved( sys, removedListeners, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
+                }
+                if( reactiveData.Value.Changed ) {
+                    if( changedListeners == null )
+                        changedListeners = instanceData.anyChangedQuery.ToComponentDataArray<Any$$componentName$$ChangedListener>();
+                    FireChanged( sys, changedListeners, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
+                }
             }
 
             entities.Dispose();
             return dependency;
         }
 
-        private static void FireAdded( $$systemNameFull$$ sys, InstanceData instanceData, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
+        private static void FireAdded( $$systemNameFull$$ sys, Any$$componentName$$AddedListener[] listeners, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
         {
-            var anyAdded = instanceData.anyAddedQuery.ToComponentDataArray<Any$$componentName$$AddedListener>();
-            foreach( var listener in anyAdded )
+            foreach( var listener in listeners )
                 listener.Value.OnAny$$componentName$$Added( entity, component, world );
         }
 
-        private static void FireRemoved( $$systemNameFull$$ sys, InstanceData instanceData, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
+        private static void FireRemoved( $$systemNameFull$$ sys, Any$$componentName$$RemovedListener[] listeners, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
         {
-            var anyRemoved = instanceData.anyRemovedQuery.ToComponentDataArray<Any$$componentName$$RemovedListener>();
-            foreach( var listener in anyRemoved )
+            foreach( var listener in listeners )
                 listener.Value.OnAny$$componentName$$Removed( entity, world );
         }
 
-        private static void FireChanged( $$systemNameFull$$ sys, InstanceData instanceData, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
+        private static void FireChanged( $$systemNameFull$$ sys, Any$$componentName$$ChangedListener[] listeners, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
         {
-            var anyChanged = instanceData.anyChangedQuery.ToComponentDataArray<Any$$componentName$$ChangedListener>();
-            foreach( var listener in anyChanged )
+            foreach( var listener in listeners )
                 listener.Value.OnAny$$componentName$$Changed( entity, component, world );
         }
     }
