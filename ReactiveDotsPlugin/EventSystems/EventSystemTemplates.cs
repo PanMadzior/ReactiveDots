@@ -106,6 +106,7 @@ $$placeForReactiveComponent$$
         private struct InstanceData
         {
             public EntityQuery reactiveQuery;
+            public EntityQuery reactiveForRemovedQuery;
             public EntityQuery anyAddedQuery;
             public EntityQuery anyRemovedQuery;
             public EntityQuery anyChangedQuery;
@@ -126,6 +127,10 @@ $$placeForReactiveComponent$$
             var data = new InstanceData();
             data.reactiveQuery = sys.CreateReactiveQuery(
                 ComponentType.ReadOnly<$$componentNameFull$$>(),
+                ComponentType.ReadOnly<$$reactiveComponentNameFull$$>()
+            );
+            data.reactiveForRemovedQuery = sys.CreateReactiveQuery(
+                ComponentType.Exclude<$$componentNameFull$$>(),
                 ComponentType.ReadOnly<$$reactiveComponentNameFull$$>()
             );
             data.anyAddedQuery = sys.CreateReactiveQuery(
@@ -153,24 +158,19 @@ $$placeForReactiveComponent$$
         public static Unity.Jobs.JobHandle FireEvents( $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
         {
-            var instanceData = GetOrCreateInstanceData( sys );
-            var entities = instanceData.reactiveQuery.ToEntityArray( Allocator.Temp );
+            var instanceData       = GetOrCreateInstanceData( sys );
 
+            // added & changed:
+            var entities = instanceData.reactiveQuery.ToEntityArray( Allocator.Temp );
             Any$$componentName$$AddedListener[]   addedListeners   = null;
-            Any$$componentName$$RemovedListener[] removedListeners = null;
             Any$$componentName$$ChangedListener[] changedListeners = null;
 
-            foreach ( var e in entities ) {
+            foreach( var e in entities ) {
                 var reactiveData = sys.EntityManager.GetComponentData<$$reactiveComponentNameFull$$>( e );
                 if( reactiveData.Value.Added ) {
                     if( addedListeners == null )
                         addedListeners = instanceData.anyAddedQuery.ToComponentDataArray<Any$$componentName$$AddedListener>();
                     FireAdded( sys, addedListeners, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
-                }
-                if( reactiveData.Value.Removed ) {
-                    if( removedListeners == null )
-                        removedListeners = instanceData.anyRemovedQuery.ToComponentDataArray<Any$$componentName$$RemovedListener>();
-                    FireRemoved( sys, removedListeners, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
                 }
                 if( reactiveData.Value.Changed ) {
                     if( changedListeners == null )
@@ -180,6 +180,21 @@ $$placeForReactiveComponent$$
             }
 
             entities.Dispose();
+
+            // removed:
+            var entitiesForRemoved = instanceData.reactiveForRemovedQuery.ToEntityArray( Allocator.Temp );
+            Any$$componentName$$RemovedListener[] removedListeners = null;
+
+            foreach( var e in entitiesForRemoved ) {
+                var reactiveData = sys.EntityManager.GetComponentData<$$reactiveComponentNameFull$$>( e );
+                if( reactiveData.Value.Removed ) {
+                    if( removedListeners == null )
+                        removedListeners = instanceData.anyRemovedQuery.ToComponentDataArray<Any$$componentName$$RemovedListener>();
+                    FireRemoved( sys, removedListeners, e, sys.World );
+                }
+            }
+
+            entitiesForRemoved.Dispose();
             return dependency;
         }
 
@@ -189,7 +204,7 @@ $$placeForReactiveComponent$$
                 listener.Value.OnAny$$componentName$$Added( entity, component, world );
         }
 
-        private static void FireRemoved( $$systemNameFull$$ sys, Any$$componentName$$RemovedListener[] listeners, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
+        private static void FireRemoved( $$systemNameFull$$ sys, Any$$componentName$$RemovedListener[] listeners, Unity.Entities.Entity entity, Unity.Entities.World world )
         {
             foreach( var listener in listeners )
                 listener.Value.OnAny$$componentName$$Removed( entity, world );
