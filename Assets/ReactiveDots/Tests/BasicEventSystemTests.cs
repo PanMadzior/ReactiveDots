@@ -61,7 +61,7 @@ namespace ReactiveDots.Tests
         }
 
         [Test]
-        public void AnyRemovedListener()
+        public void AnyRemovedListenerOnComponentRemoval()
         {
             var entity = EntityManager.CreateEntity();
             EntityManager.AddComponentData( entity, new EventComponent() { Value = 0 } );
@@ -84,6 +84,32 @@ namespace ReactiveDots.Tests
             _defaultEventSystem.Update();
             Assert.False( _anyRemovedInvoked,
                 "Any removed event should have not fired in the second frame after component removal, but did!" );
+        }
+
+        [Test]
+        public void AnyRemovedListenerOnEntityDestroy()
+        {
+            var entity = EntityManager.CreateEntity();
+            EntityManager.AddComponentData( entity, new EventComponent() { Value = 0 } );
+            var listener = EntityManager.CreateEntity();
+            EntityManager.AddComponentData( listener, new AnyEventComponentRemovedListener() { Value = this } );
+            _anyRemovedInvoked = false;
+            _defaultEventSystem.Update();
+            Assert.False( _anyRemovedInvoked, "Any removed event should have not fired after component add, but did!" );
+
+            EntityManager.SetComponentData( entity, new EventComponent() { Value = 1 } );
+            _defaultEventSystem.Update();
+            Assert.False( _anyRemovedInvoked,
+                "Any removed event should have not fired after component change, but did!" );
+
+            EntityManager.DestroyEntity( entity );
+            _defaultEventSystem.Update();
+            Assert.True( _anyRemovedInvoked, "Any removed event should have fired, but didn't!" );
+            _anyRemovedInvoked = false;
+            
+            _defaultEventSystem.Update();
+            Assert.False( _anyRemovedInvoked,
+                "Any removed event should have not fired in the second frame after entity destroy, but did!" );
         }
 
         public void OnAnyEventComponentRemoved( Entity entity, World world )

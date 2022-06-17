@@ -65,7 +65,7 @@ namespace ReactiveDots.Tests
         }
 
         [Test]
-        public void IsRemoved()
+        public void IsRemovedOnComponentRemoval()
         {
             var entity = EntityManager.CreateEntity();
             EntityManager.AddComponentData( entity, new TestComponent() { Value = 0 } );
@@ -84,6 +84,28 @@ namespace ReactiveDots.Tests
             _testReactive.Update();
             Assert.False( EntityManager.HasComponent<TestReactiveSystem.TestComponentReactive>( entity ),
                 "Reactive data should not be present in the second frame after main component removal, but it is!" );
+        }
+
+        [Test]
+        public void IsRemovedOnEntityDestroy()
+        {
+            var entity = EntityManager.CreateEntity();
+            EntityManager.AddComponentData( entity, new TestComponent() { Value = 0 } );
+            _testReactive.Update();
+
+            var reactiveData1 = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity ).Value;
+            Assert.False( reactiveData1.Removed,
+                "Reactive data .Removed should be false in first update, but it is true!" );
+
+            EntityManager.DestroyEntity( entity );
+            _testReactive.Update();
+            var reactiveData2 = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity ).Value;
+            Assert.True( reactiveData2.Removed,
+                "Reactive data .Added should be true after entity destroy, but it is false!" );
+
+            _testReactive.Update();
+            Assert.False( EntityManager.HasComponent<TestReactiveSystem.TestComponentReactive>( entity ),
+                "Reactive data should not be present in the second frame after entity destroy, but it is!" );
         }
     }
 
