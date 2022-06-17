@@ -10,7 +10,7 @@ namespace ReactiveDots
         protected override void OnCreate()
         {
             base.OnCreate();
-            InitMethodAttribute.InvokeInitMethodsFor( this );
+            InitWithAttribute.InvokeInitMethodsFor( this );
         }
 
         protected override void OnUpdate()

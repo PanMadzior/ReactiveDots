@@ -11,7 +11,6 @@ namespace $$namespace$$
 {    
     public partial class $$systemName$$
     {
-        public  ReactiveEvents Events { private set; get; } = new ReactiveEvents();
         private List<Action<$$systemName$$>> _reactiveAddedRemovedUpdates = new List<Action<$$systemName$$>>();
         private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _reactiveChangedUpdates = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
         private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _eventFires = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
@@ -32,6 +31,15 @@ namespace $$namespace$$
             return dependency;
         }
 
+        public void RegisterEventComponent( Action<$$systemName$$> updateAddedRemoved, 
+            Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> updateReactive,
+            Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> fireEvents )
+        {
+            _reactiveAddedRemovedUpdates.Add( updateAddedRemoved );
+            _reactiveChangedUpdates.Add( updateReactive );
+            _eventFires.Add( fireEvents );            
+        }
+
         public EntityQuery CreateReactiveQuery( params ComponentType[] componentTypes )
         {
             return GetEntityQuery( componentTypes );
@@ -49,94 +57,37 @@ $$placeForUsings$$
 namespace $$namespace$$
 {
     // $$componentName$$ Added
-    public partial class $$systemName$$
+    public interface IAny$$componentName$$AddedListener
     {
-        public interface IAny$$componentName$$AddedListener
-        {
-            void OnAny$$componentName$$Added( Entity entity, $$componentNameFull$$ component, World world );
-        }
-
-        public partial class ReactiveEvents
-        {
-            private List<IAny$$componentName$$AddedListener> _listeners$$componentName$$Added = new List<IAny$$componentName$$AddedListener>();
-
-            public List<IAny$$componentName$$AddedListener> GetAny$$componentName$$AddedListeners()
-            {
-                return _listeners$$componentName$$Added;
-            }
-
-            public void AddAny$$componentName$$AddedListener( IAny$$componentName$$AddedListener listener )
-            {
-                _listeners$$componentName$$Added.Add( listener );
-            }
-
-            public void RemoveAny$$componentName$$AddedListener( IAny$$componentName$$AddedListener listener )
-            {
-                if ( _listeners$$componentName$$Added.Contains( listener ) )
-                    _listeners$$componentName$$Added.Remove( listener );
-            }
-        }
+        void OnAny$$componentName$$Added( Entity entity, $$componentNameFull$$ component, World world );
     }
+
+    public class Any$$componentName$$AddedListener : IComponentData
+    {
+        public IAny$$componentName$$AddedListener Value;
+    }    
 
     // $$componentName$$ Removed
-    public partial class $$systemName$$
+    public interface IAny$$componentName$$RemovedListener
     {
-        public interface IAny$$componentName$$RemovedListener
-        {
-            void OnAny$$componentName$$Removed( Entity entity, World world );
-        }
-
-        public partial class ReactiveEvents
-        {
-            private List<IAny$$componentName$$RemovedListener> _listeners$$componentName$$Removed = new List<IAny$$componentName$$RemovedListener>();
-
-            public List<IAny$$componentName$$RemovedListener> GetAny$$componentName$$RemovedListeners()
-            {
-                return _listeners$$componentName$$Removed;
-            }
-
-            public void AddAny$$componentName$$RemovedListener( IAny$$componentName$$RemovedListener listener )
-            {
-                _listeners$$componentName$$Removed.Add( listener );
-            }
-
-            public void RemoveAny$$componentName$$RemovedListener( IAny$$componentName$$RemovedListener listener )
-            {
-                if ( _listeners$$componentName$$Removed.Contains( listener ) )
-                    _listeners$$componentName$$Removed.Remove( listener );
-            }
-        }
+        void OnAny$$componentName$$Removed( Entity entity, World world );
     }
+
+    public class Any$$componentName$$RemovedListener : IComponentData
+    {
+        public IAny$$componentName$$RemovedListener Value;
+    } 
 
     // $$componentName$$ Changed
-    public partial class $$systemName$$
+    public interface IAny$$componentName$$ChangedListener
     {
-        public interface IAny$$componentName$$ChangedListener
-        {
-            void OnAny$$componentName$$Changed( Entity entity, $$componentNameFull$$ component, World world );
-        }
-
-        public partial class ReactiveEvents
-        {
-            private List<IAny$$componentName$$ChangedListener> _listeners$$componentName$$Changed = new List<IAny$$componentName$$ChangedListener>();
-
-            public List<IAny$$componentName$$ChangedListener> GetAny$$componentName$$ChangedListeners()
-            {
-                return _listeners$$componentName$$Changed;
-            }
-
-            public void AddAny$$componentName$$ChangedListener( IAny$$componentName$$ChangedListener listener )
-            {
-                _listeners$$componentName$$Changed.Add( listener );
-            }
-
-            public void RemoveAny$$componentName$$ChangedListener( IAny$$componentName$$ChangedListener listener )
-            {
-                if ( _listeners$$componentName$$Changed.Contains( listener ) )
-                    _listeners$$componentName$$Changed.Remove( listener );
-            }
-        }
+        void OnAny$$componentName$$Changed( Entity entity, $$componentNameFull$$ component, World world );
     }
+
+    public class Any$$componentName$$ChangedListener : IComponentData
+    {
+        public IAny$$componentName$$ChangedListener Value;
+    } 
 }";
         }
 
@@ -146,25 +97,18 @@ namespace $$namespace$$
 $$placeForUsings$$
 
 namespace $$namespace$$
-{ $$placeForComponents$$ $$placeForReactiveComponent$$
-
-    // $$componentName$$ Init
-    public partial class $$systemName$$
-    {
-        [ReactiveDots.InitMethod]
-        private void Init$$componentName$$Events()
-        {
-            _reactiveAddedRemovedUpdates.Add( $$systemName$$_$$componentName$$_Reactive.UpdateReactiveAddedRemoved );
-            _reactiveChangedUpdates.Add( $$systemName$$_$$componentName$$_Reactive.UpdateReactive );
-            _eventFires.Add( $$systemName$$_$$componentName$$_ReactiveEvents.FireEvents );
-        }
-    }
+{ $$placeForComponents$$
 
     public static partial class $$systemName$$_$$componentName$$_ReactiveEvents
     {
+$$placeForReactiveComponent$$
+
         private struct InstanceData
         {
             public EntityQuery reactiveQuery;
+            public EntityQuery anyAddedQuery;
+            public EntityQuery anyRemovedQuery;
+            public EntityQuery anyChangedQuery;
         }
 
         private static Dictionary<$$systemNameFull$$, InstanceData> Instances =
@@ -184,7 +128,26 @@ namespace $$namespace$$
                 ComponentType.ReadOnly<$$componentNameFull$$>(),
                 ComponentType.ReadOnly<$$reactiveComponentNameFull$$>()
             );
+            data.anyAddedQuery = sys.CreateReactiveQuery(
+                ComponentType.ReadOnly<Any$$componentName$$AddedListener>()
+            );
+            data.anyRemovedQuery = sys.CreateReactiveQuery(
+                ComponentType.ReadOnly<Any$$componentName$$RemovedListener>()
+            );
+            data.anyChangedQuery = sys.CreateReactiveQuery(
+                ComponentType.ReadOnly<Any$$componentName$$ChangedListener>()
+            );
             return data;
+        }
+
+        [ReactiveDots.InitWith(typeof($$systemNameFull$$))]
+        private static void Init$$componentName$$Events( $$systemNameFull$$ sys )
+        {
+            sys.RegisterEventComponent(
+                $$systemName$$_$$componentName$$_Reactive.UpdateReactiveAddedRemoved,
+                $$systemName$$_$$componentName$$_Reactive.UpdateReactive,
+                $$systemName$$_$$componentName$$_ReactiveEvents.FireEvents
+            );
         }
 
         public static Unity.Jobs.JobHandle FireEvents( $$systemNameFull$$ sys,
@@ -195,33 +158,36 @@ namespace $$namespace$$
             foreach ( var e in entities ) {
                 var reactiveData = sys.EntityManager.GetComponentData<$$reactiveComponentNameFull$$>( e );
                 if( reactiveData.Value.Added )
-                    FireAdded( sys, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
+                    FireAdded( sys, instanceData, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
                 if( reactiveData.Value.Removed )
-                    FireRemoved( sys, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
+                    FireRemoved( sys, instanceData, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
                 if( reactiveData.Value.Changed )
-                    FireChanged( sys, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
+                    FireChanged( sys, instanceData, e, sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ), sys.World );
             }
 
             entities.Dispose();
             return dependency;
         }
 
-        public static void FireAdded( $$systemNameFull$$ sys, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
+        private static void FireAdded( $$systemNameFull$$ sys, InstanceData instanceData, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
         {
-            foreach( var listener in sys.Events.GetAny$$componentName$$AddedListeners() )
-                listener.OnAny$$componentName$$Added( entity, component, world );
+            var anyAdded = instanceData.anyAddedQuery.ToComponentDataArray<Any$$componentName$$AddedListener>();
+            foreach( var listener in anyAdded )
+                listener.Value.OnAny$$componentName$$Added( entity, component, world );
         }
 
-        public static void FireRemoved( $$systemNameFull$$ sys, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
+        private static void FireRemoved( $$systemNameFull$$ sys, InstanceData instanceData, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
         {
-            foreach( var listener in sys.Events.GetAny$$componentName$$RemovedListeners() )
-                listener.OnAny$$componentName$$Removed( entity, world );
+            var anyRemoved = instanceData.anyRemovedQuery.ToComponentDataArray<Any$$componentName$$RemovedListener>();
+            foreach( var listener in anyRemoved )
+                listener.Value.OnAny$$componentName$$Removed( entity, world );
         }
 
-        public static void FireChanged( $$systemNameFull$$ sys, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
+        private static void FireChanged( $$systemNameFull$$ sys, InstanceData instanceData, Unity.Entities.Entity entity, $$componentNameFull$$ component, Unity.Entities.World world )
         {
-            foreach( var listener in sys.Events.GetAny$$componentName$$ChangedListeners() )
-                listener.OnAny$$componentName$$Changed( entity, component, world );
+            var anyChanged = instanceData.anyChangedQuery.ToComponentDataArray<Any$$componentName$$ChangedListener>();
+            foreach( var listener in anyChanged )
+                listener.Value.OnAny$$componentName$$Changed( entity, component, world );
         }
     }
 }";

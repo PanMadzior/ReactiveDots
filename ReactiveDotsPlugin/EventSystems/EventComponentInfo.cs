@@ -18,7 +18,8 @@ namespace ReactiveDotsPlugin
         public string EventSystemClassNameFull { private set; get; }
 
         public string FieldToCompareName { private set; get; }
-        public string ReactiveComponentNameFull => EventSystemClassNameFull + "." + ComponentName + "Reactive";
+        public string ReactiveComponentNameFull =>
+            $"{ComponentNamespace}.{EventSystemClassName}_{ComponentName}_ReactiveEvents.{ComponentName}Reactive";
 
         public EventComponentInfo( StructDeclarationSyntax structNode, AttributeSyntax attribute )
         {

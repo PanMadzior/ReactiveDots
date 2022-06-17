@@ -94,7 +94,7 @@ namespace ReactiveDotsPlugin
             var globalTemplate = EventSystemTemplates.GetComponentInterfacesTemplate();
             var source = globalTemplate
                 .Replace( "$$placeForUsings$$", usingsInsert )
-                .Replace( "$$namespace$$", eventComponent.EventSystemClassNamespace )
+                .Replace( "$$namespace$$", eventComponent.ComponentNamespace )
                 .Replace( "$$systemName$$", eventComponent.EventSystemClassName )
                 .Replace( "$$systemNameFull$$", eventComponent.EventSystemClassNameFull )
                 .Replace( "$$componentName$$", eventComponent.ComponentName )
@@ -112,7 +112,7 @@ namespace ReactiveDotsPlugin
             var reactiveComponentDeclaration      = GetReactiveDeclarationInsert( eventComponent );
             var source = globalTemplate
                 .Replace( "$$placeForUsings$$", usingsInsert )
-                .Replace( "$$namespace$$", eventComponent.EventSystemClassNamespace )
+                .Replace( "$$namespace$$", eventComponent.ComponentNamespace )
                 .Replace( "$$systemName$$", eventComponent.EventSystemClassName )
                 .Replace( "$$systemNameFull$$", eventComponent.EventSystemClassNameFull )
                 .Replace( "$$componentName$$", eventComponent.ComponentName )
@@ -129,7 +129,6 @@ namespace ReactiveDotsPlugin
         {
             var template = ReactiveSystemTemplates.GetTemplateForReactiveComponent();
             return template
-                .Replace( "$$systemName$$", componentInfo.EventSystemClassName )
                 .Replace( "$$componentName$$", componentInfo.ComponentName )
                 .Replace( "$$componentNameFull$$", componentInfo.ComponentNameFull );
         }

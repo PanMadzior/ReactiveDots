@@ -184,13 +184,10 @@ $$placeForComponents$$
 
         public static string GetTemplateForReactiveComponent()
         {
-            return @"    public partial class $$systemName$$
-    {
-        public struct $$componentName$$Reactive : ISystemStateComponentData
+            return @"        public struct $$componentName$$Reactive : ISystemStateComponentData
         {
             public ComponentReactiveData<$$componentNameFull$$> Value;
-        }
-    }";
+        }";
         }
     }
 }
