@@ -115,5 +115,17 @@ namespace ReactiveDotsPlugin
                     .Replace( "\"", "" );
             return argumentValue;
         }
+
+        public static void PopulateSetWithUniqueUsings( HashSet<string> set, TypeDeclarationSyntax type,
+            GeneratorExecutionContext context )
+        {
+            var usingsForType = type.SyntaxTree.GetCompilationUnitRoot( context.CancellationToken ).Usings;
+            foreach ( var usingForType in usingsForType ) {
+                var str = usingForType.Name.ToString();
+                if ( set.Contains( str ) )
+                    continue;
+                set.Add( str );
+            }
+        }
     }
 }

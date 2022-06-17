@@ -13,14 +13,12 @@ namespace ReactiveDotsPlugin
         public string ComponentNamespace { private set; get; }
         public string ComponentNameFull { private set; get; }
 
-        public ClassDeclarationSyntax EventSystemClassSyntax { private set; get; }
         public string EventSystemClassName { private set; get; }
         public string EventSystemClassNamespace { private set; get; }
         public string EventSystemClassNameFull { private set; get; }
 
         public string FieldToCompareName { private set; get; }
-        public string ReactiveComponentNameFull =>
-            EventSystemClassNamespace + "." + EventSystemClassName + "." + ComponentName + "Reactive";
+        public string ReactiveComponentNameFull => EventSystemClassNameFull + "." + ComponentName + "Reactive";
 
         public EventComponentInfo( StructDeclarationSyntax structNode, AttributeSyntax attribute )
         {
@@ -31,23 +29,25 @@ namespace ReactiveDotsPlugin
             ComponentName      = StructSyntax.Identifier.Text;
             ComponentNamespace = GeneratorUtils.GetNamespaceFor( StructSyntax );
             ComponentNameFull  = GeneratorUtils.GetFullName( StructSyntax );
-        }
 
-        public void Update( GeneratorExecutionContext context )
-        {
             if ( Attribute.ArgumentList != null ) {
                 if ( Attribute.ArgumentList.Arguments.Count >= 1 )
-                    GetEventTypeInfo( context, Attribute );
+                    GetEventTypeInfo( Attribute, 0 );
                 if ( Attribute.ArgumentList.Arguments.Count >= 2 )
-                    GetEventSystemInfo( context, Attribute.ArgumentList.Arguments[1] );
+                    GetEventSystemInfo( Attribute.ArgumentList.Arguments[1] );
+                else {
+                    EventSystemClassNamespace = "ReactiveDots";
+                    EventSystemClassNameFull  = "ReactiveDots.DefaultEventSystem";
+                    EventSystemClassName      = "DefaultEventSystem";
+                }
             }
 
             FieldToCompareName = GeneratorUtils.GetAttributeArgumentValue( Attribute, "FieldNameToCompare", "Value" );
         }
 
-        private void GetEventTypeInfo( GeneratorExecutionContext context, AttributeSyntax attribute )
+        private void GetEventTypeInfo( AttributeSyntax attribute, int index )
         {
-            var eventTypeStr = GeneratorUtils.GetAttributeArgumentValue( attribute, 0, "EventType.All" );
+            var eventTypeStr = GeneratorUtils.GetAttributeArgumentValue( attribute, index, "EventType.All" );
             switch ( eventTypeStr ) {
                 case "EventType.All":
                     EventType = EventType.All;
@@ -64,15 +64,15 @@ namespace ReactiveDotsPlugin
             }
         }
 
-        private void GetEventSystemInfo( GeneratorExecutionContext context, AttributeArgumentSyntax argument )
+        private void GetEventSystemInfo( AttributeArgumentSyntax argument )
         {
             var systemType = GeneratorUtils.GetTypeofFromAttributeArgument( argument );
-            if ( GeneratorUtils.TryFindClassSyntaxByName( context, systemType, out var classSyntax ) ) {
-                EventSystemClassSyntax    = classSyntax;
-                EventSystemClassNamespace = GeneratorUtils.GetNamespaceFor( classSyntax );
-                EventSystemClassNameFull  = GeneratorUtils.GetFullName( classSyntax );
-                EventSystemClassName      = systemType;
-            }
+            var split      = systemType.Split( '.' );
+            EventSystemClassNamespace = String.Empty;
+            for ( int i = 0; i < split.Length - 1; i++ )
+                EventSystemClassNamespace = split[i] + ( i < split.Length - 2 ? "." : "" );
+            EventSystemClassNameFull = systemType;
+            EventSystemClassName     = split[split.Length - 1];
         }
     }
 }

@@ -4,16 +4,17 @@ using UnityEngine;
 
 namespace ReactiveDotsSample
 {
-    public class BouncesListener : MonoBehaviour, EventSystem.IAnyBouncesAddedListener,
-        EventSystem.IAnyBouncesChangedListener, EventSystem.IAnyBouncesRemovedListener
+    public class BouncesListener : MonoBehaviour, DefaultEventSystem.IAnyBouncesAddedListener,
+        DefaultEventSystem.IAnyBouncesChangedListener, DefaultEventSystem.IAnyBouncesRemovedListener
     {
         private void Awake()
         {
-            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<EventSystem>().Events
+            ReactiveDots.DefaultEventSystem
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<DefaultEventSystem>().Events
                 .AddAnyBouncesAddedListener( this );
-            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<EventSystem>().Events
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<DefaultEventSystem>().Events
                 .AddAnyBouncesChangedListener( this );
-            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<EventSystem>().Events
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<DefaultEventSystem>().Events
                 .AddAnyBouncesRemovedListener( this );
         }
 

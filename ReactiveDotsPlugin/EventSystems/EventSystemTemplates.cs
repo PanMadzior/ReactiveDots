@@ -2,37 +2,35 @@
 {
     public static class EventSystemTemplates
     {
-        public static string GetGlobalTemplate()
+        public static string GetEventSystemMainTemplate()
         {
             return @"// Auto Generated Code
-using System.Collections.Generic;
-using Unity.Collections;
-using Unity.Entities;
-using ReactiveDots;
+$$placeForUsings$$
 
 namespace $$namespace$$
-{
-    public static class $$systemName$$_Reactive
+{    
+    public partial class $$systemName$$
     {
-        public static Unity.Jobs.JobHandle UpdateReactive( this $$systemNameFull$$ sys,
-            Unity.Jobs.JobHandle dependency )
-        { $$placeForUpdatesAddedRemoved$$ $$placeForUpdatesChanged$$
+        public  ReactiveEvents Events { private set; get; } = new ReactiveEvents();
+        private List<Action<$$systemName$$>> _reactiveAddedRemovedUpdates = new List<Action<$$systemName$$>>();
+        private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _reactiveChangedUpdates = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
+        private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _eventFires = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
+
+        private Unity.Jobs.JobHandle UpdateReactive( Unity.Jobs.JobHandle dependency )
+        {
+            foreach( var update in _reactiveAddedRemovedUpdates )
+                update( this );
+            foreach( var update in _reactiveChangedUpdates )
+                dependency = update( this, dependency );
             return dependency;
         }
 
-        public static Unity.Jobs.JobHandle FireEvents( this $$systemNameFull$$ sys,
-            Unity.Jobs.JobHandle dependency )
-        { $$placeForEventFires$$
+        private Unity.Jobs.JobHandle FireEvents( Unity.Jobs.JobHandle dependency )
+        {
+            foreach( var func in _eventFires )
+                dependency = func( this, dependency );
             return dependency;
         }
-    }
-$$placeForReactiveComponents$$
-$$placeForComponents$$
-$$placeForComponentEvents$$
-    
-    public partial class $$systemName$$
-    {
-        public ReactiveEvents Events { private set; get; } = new ReactiveEvents();
 
         public EntityQuery CreateReactiveQuery( params ComponentType[] componentTypes )
         {
@@ -43,20 +41,19 @@ $$placeForComponentEvents$$
 ";
         }
 
-        public static string GetTemplateForEventFire()
+        public static string GetComponentInterfacesTemplate()
         {
-            return "            dependency = $$systemName$$_$$componentName$$_ReactiveEvents.FireEvents( sys, dependency );";
-        }
+            return @"// Auto Generated Code
+$$placeForUsings$$
 
-        public static string GetTemplateForComponentEvents()
-        {
-            return @"
+namespace $$namespace$$
+{
     // $$componentName$$ Added
     public partial class $$systemName$$
     {
         public interface IAny$$componentName$$AddedListener
         {
-            void OnAny$$componentName$$Added( Entity entity, Bounces bounces, World world );
+            void OnAny$$componentName$$Added( Entity entity, $$componentNameFull$$ component, World world );
         }
 
         public partial class ReactiveEvents
@@ -116,7 +113,7 @@ $$placeForComponentEvents$$
     {
         public interface IAny$$componentName$$ChangedListener
         {
-            void OnAny$$componentName$$Changed( Entity entity, Bounces bounces, World world );
+            void OnAny$$componentName$$Changed( Entity entity, $$componentNameFull$$ component, World world );
         }
 
         public partial class ReactiveEvents
@@ -138,6 +135,28 @@ $$placeForComponentEvents$$
                 if ( _listeners$$componentName$$Changed.Contains( listener ) )
                     _listeners$$componentName$$Changed.Remove( listener );
             }
+        }
+    }
+}";
+        }
+
+        public static string GetComponentJobsTemplate()
+        {
+            return @"// Auto Generated Code
+$$placeForUsings$$
+
+namespace $$namespace$$
+{ $$placeForComponents$$ $$placeForReactiveComponent$$
+
+    // $$componentName$$ Init
+    public partial class $$systemName$$
+    {
+        [ReactiveDots.InitMethod]
+        private void Init$$componentName$$Events()
+        {
+            _reactiveAddedRemovedUpdates.Add( $$systemName$$_$$componentName$$_Reactive.UpdateReactiveAddedRemoved );
+            _reactiveChangedUpdates.Add( $$systemName$$_$$componentName$$_Reactive.UpdateReactive );
+            _eventFires.Add( $$systemName$$_$$componentName$$_ReactiveEvents.FireEvents );
         }
     }
 
@@ -204,7 +223,8 @@ $$placeForComponentEvents$$
             foreach( var listener in sys.Events.GetAny$$componentName$$ChangedListeners() )
                 listener.OnAny$$componentName$$Changed( entity, component, world );
         }
-    }";
+    }
+}";
         }
     }
 }

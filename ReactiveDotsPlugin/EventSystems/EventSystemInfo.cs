@@ -10,8 +10,6 @@ namespace ReactiveDotsPlugin
         public string SystemNamespace { private set; get; }
         public string SystemNameFull { private set; get; }
 
-        private List<AttributeSyntax> _tempAttributes;
-
         public EventSystemInfo( ClassDeclarationSyntax classSyntax )
         {
             ClassSyntax     = classSyntax;

@@ -11,7 +11,8 @@ namespace ReactiveDots
 
         public ReactiveEventAttribute( EventType type = EventType.All )
         {
-            EventType = type;
+            EventType       = type;
+            EventSystemType = typeof(ReactiveDots.DefaultEventSystem);
         }
 
         public ReactiveEventAttribute( EventType type, Type eventSystem )

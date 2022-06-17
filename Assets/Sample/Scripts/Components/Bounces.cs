@@ -3,7 +3,7 @@ using Unity.Entities;
 
 namespace ReactiveDotsSample
 {
-    [ReactiveEvent( EventType.All, typeof(EventSystem) )]
+    [ReactiveEvent( EventType.All )]
     public struct Bounces : IComponentData
     {
         public int Value;
