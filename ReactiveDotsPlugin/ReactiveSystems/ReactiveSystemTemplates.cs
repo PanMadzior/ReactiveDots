@@ -63,7 +63,7 @@
                     Value = new ComponentReactiveData<$$componentNameFull$$>() {
                         PreviousValue        = sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ),
                         Added                = true,
-                        Changed              = true,
+                        Changed              = false,
                         Removed              = false,
                         _FirstCheckCompleted = false
                     }
@@ -82,10 +82,9 @@
                 if ( rCompData.Removed )
                     sys.EntityManager.RemoveComponent<$$reactiveComponentNameFull$$>( e );
                 else {
-                    rCompData.Added   = false;
-                    rCompData.Changed = false;
                     rCompData.Removed = true;
                     rComp.Value       = rCompData;
+                    sys.EntityManager.SetComponentData( e, rComp );
                 }
             }
 
@@ -132,8 +131,8 @@
                 rComp.Value = new ComponentReactiveData<$$componentNameFull$$>() {
                     PreviousValue        = comp,
                     Added                = !rComp.Value._FirstCheckCompleted,
-                    Changed              = rComp.Value.Added || BooleanSimplifier.Any( comp.$$variableNameToCompare$$ != rComp.Value.PreviousValue.$$variableNameToCompare$$ ),
-                    Removed              = false,
+                    Changed              = BooleanSimplifier.Any( comp.$$variableNameToCompare$$ != rComp.Value.PreviousValue.$$variableNameToCompare$$ ),
+                    Removed              = rComp.Value.Removed,
                     _FirstCheckCompleted = true
                 };
             }
