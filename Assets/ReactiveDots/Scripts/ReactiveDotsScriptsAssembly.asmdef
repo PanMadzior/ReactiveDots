@@ -3,7 +3,9 @@
     "rootNamespace": "",
     "references": [
         "Unity.Entities",
-        "Unity.Mathematics"
+        "Unity.Mathematics",
+        "Unity.Burst",
+        "Unity.Jobs"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
