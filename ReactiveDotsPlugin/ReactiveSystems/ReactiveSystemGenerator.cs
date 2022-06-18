@@ -36,6 +36,8 @@ namespace ReactiveDotsPlugin
             var reactiveUpdatesAddedRemovedInsert = string.Empty;
             var reactiveComponentsInsert = string.Empty;
             for ( int i = 0; i < reactiveSystem.ReactiveAttributes.Count; i++ ) {
+                if ( !reactiveSystem.ReactiveAttributes[i].IsValid )
+                    continue;
                 reactiveUpdatesAddedRemovedInsert += "\n" + ReplaceKeywords(
                     ReactiveSystemTemplates.GetTemplateForSystemUpdateAddedRemoved(),
                     reactiveSystem, i );

@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace ReactiveDotsPlugin
@@ -34,7 +32,7 @@ namespace ReactiveDotsPlugin
 
         private void GenerateEventSystem( GeneratorExecutionContext context, EventSystemInfo eventSystem )
         {
-            var usingsInsert   = GetUsings( context, eventSystem.ClassSyntax );
+            var usingsInsert   = GeneratorUtils.GetUsingsInsert( context, eventSystem.ClassSyntax, GetCommonUsings() );
             var globalTemplate = EventSystemTemplates.GetEventSystemMainTemplate();
             var source = globalTemplate
                 .Replace( "$$placeForUsings$$", usingsInsert )
@@ -46,7 +44,7 @@ namespace ReactiveDotsPlugin
 
         private void GenerateComponentInterfaces( GeneratorExecutionContext context, EventComponentInfo eventComponent )
         {
-            var usingsInsert   = GetUsings( context, eventComponent.DeclaredOn );
+            var usingsInsert = GeneratorUtils.GetUsingsInsert( context, eventComponent.DeclaredOn, GetCommonUsings() );
             var globalTemplate = EventSystemTemplates.GetComponentInterfacesTemplate();
             var source = globalTemplate
                 .Replace( "$$placeForUsings$$", usingsInsert )
@@ -62,10 +60,10 @@ namespace ReactiveDotsPlugin
 
         private void GenerateComponentJobs( GeneratorExecutionContext context, EventComponentInfo eventComponent )
         {
-            var usingsInsert                      = GetUsings( context, eventComponent.DeclaredOn );
-            var globalTemplate                    = EventSystemTemplates.GetComponentJobsTemplate();
+            var usingsInsert = GeneratorUtils.GetUsingsInsert( context, eventComponent.DeclaredOn, GetCommonUsings() );
+            var globalTemplate = EventSystemTemplates.GetComponentJobsTemplate();
             var reactiveComponentProcessorsInsert = GetReactiveJobsInsert( eventComponent );
-            var reactiveComponentDeclaration      = GetReactiveDeclarationInsert( eventComponent );
+            var reactiveComponentDeclaration = GetReactiveDeclarationInsert( eventComponent );
             var source = globalTemplate
                 .Replace( "$$placeForUsings$$", usingsInsert )
                 .Replace( "$$namespace$$", eventComponent.ComponentVisibleNamespace )
@@ -101,24 +99,15 @@ namespace ReactiveDotsPlugin
                 .Replace( "$$variableNameToCompare$$", componentInfo.FieldToCompareName );
         }
 
-        private string GetUsings( GeneratorExecutionContext context, TypeDeclarationSyntax type )
+        private HashSet<string> GetCommonUsings()
         {
-            var usings = new HashSet<string>();
-            PopulateSetWithCommonUsings( usings );
-            GeneratorUtils.PopulateSetWithUniqueUsings( usings, type, context );
-            var usingsInsert = string.Empty;
-            foreach ( var u in usings )
-                usingsInsert += "using " + u + ";\n";
-            return usingsInsert;
-        }
-
-        private void PopulateSetWithCommonUsings( HashSet<string> set )
-        {
+            var set = new HashSet<string>();
             set.Add( "System" );
             set.Add( "System.Collections.Generic" );
             set.Add( "Unity.Collections" );
             set.Add( "Unity.Entities" );
             set.Add( "ReactiveDots" );
+            return set;
         }
     }
 }
