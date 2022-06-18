@@ -1,6 +1,5 @@
 ﻿using ReactiveDots;
 using Unity.Entities;
-using UnityEngine;
 
 namespace ReactiveDotsSample
 {
@@ -16,10 +15,10 @@ namespace ReactiveDotsSample
         {
             Dependency = this.UpdateReactive( Dependency );
 
-            Entities.ForEach( ( ref Bounces points, in MoveDirectionReactive moveDirReactive ) =>
+            Entities.ForEach( ( ref Bounces bounces, in MoveDirectionReactive moveDirReactive ) =>
             {
-                if ( !moveDirReactive.Value.Added && moveDirReactive.Value.Changed )
-                    points.Value += 1;
+                if ( moveDirReactive.Value.AddedOrChanged )
+                    bounces.Value += 1;
             } ).ScheduleParallel();
         }
     }

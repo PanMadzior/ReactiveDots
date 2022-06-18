@@ -9,5 +9,9 @@ namespace ReactiveDots
         public bool Added;
         public bool Removed;
         public bool _FirstCheckCompleted;
+
+        public bool AddedOrChanged => Added || Changed;
+        public bool AddedOrRemoved => Added || Removed;
+        public bool ChangedOrRemoved => Changed || Removed;
     }
 }
