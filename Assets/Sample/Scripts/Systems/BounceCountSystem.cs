@@ -17,7 +17,7 @@ namespace ReactiveDotsSample
 
             Entities.ForEach( ( ref Bounces bounces, in MoveDirectionReactive moveDirReactive ) =>
             {
-                if ( moveDirReactive.Value.AddedOrChanged )
+                if ( moveDirReactive.Value.Changed )
                     bounces.Value += 1;
             } ).ScheduleParallel();
         }

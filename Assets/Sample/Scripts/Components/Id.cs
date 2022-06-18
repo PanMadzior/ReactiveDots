@@ -4,13 +4,14 @@ namespace ReactiveDotsSample
 {
     public struct Id : IComponentData
     {
-        public static int LastId;
-        public        int Value;
+        public int Value;
+
+        private static int s_lastId;
 
         public static Id CreateNew()
         {
             return new Id() {
-                Value = ++LastId
+                Value = ++s_lastId
             };
         }
     }

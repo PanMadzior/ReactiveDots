@@ -23,6 +23,7 @@ namespace ReactiveDotsSample
 
         private void SpawnBall()
         {
+            // TODO: change instantiate to a DOTS way
             GameObject.Instantiate( ballsPrefab );
         }
 
