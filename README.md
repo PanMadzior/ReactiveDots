@@ -9,7 +9,8 @@ Current version is not battle-tested. It is not recommended to use it in product
 On daily basis I work with Entitas, where reactive systems are a core feature. From time to time in my spare time I experiment with DOTS. ReactiveDots is such an experiment. My goal here was to transfer my workflows from Entitas to DOTS.
 
 ## Table of contents
-1. [Features](#features).
+1. [Installation](#installation)
+2. [Features](#features)
    1. [ReactiveSystems](#reactive-systems)
       1. [Boilerplate code](#boilerplate-code-for-reactive-system)
    2. [Event Listeners](#event-listeners)
@@ -17,8 +18,17 @@ On daily basis I work with Entitas, where reactive systems are a core feature. F
       2. [Self vs Any listeners](#self-vs-any-events)
       3. [Custom event system](#custom-event-system)
       4. [Main thread](#main-thread)
-2. [Known issues and limitations](#known-issues-and-limitations)
-3. [Planned features](#planned-features)
+3. [Known issues and limitations](#known-issues-and-limitations)
+4. [Planned features](#planned-features)
+
+## Installation
+Simply import ReactiveDots unity package from releases to your project. If there are some compilation errors you may have to restart Unity, should work after.
+
+For source generators to work you have to have a fairly updated version of Visual Studio or Rider.
+
+Tested on **Unity 2020.3.31f1**, **Entities 0.50.0-preview.24** and **Rider 2022.1.1.**
+
+Unit tests succeeded also on **Entities 0.50.1-preview.2** and **0.51.0-preview.32**.
 
 # Features
 You can play around with the implemented features in a sample project.
