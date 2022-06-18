@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace ReactiveDotsPlugin
@@ -29,10 +30,11 @@ namespace ReactiveDotsPlugin
 
         private void GenerateReactiveSystem( GeneratorExecutionContext context, ReactiveSystemInfo reactiveSystem )
         {
-            var globalTemplate                    = ReactiveSystemTemplates.GetGlobalTemplate();
-            var reactiveUpdatesChangedInsert      = string.Empty;
+            var globalTemplate = ReactiveSystemTemplates.GetGlobalTemplate();
+            var usingsInsert = GeneratorUtils.GetUsingsInsert( context, reactiveSystem.ClassSyntax, GetCommonUsings() );
+            var reactiveUpdatesChangedInsert = string.Empty;
             var reactiveUpdatesAddedRemovedInsert = string.Empty;
-            var reactiveComponentsInsert          = string.Empty;
+            var reactiveComponentsInsert = string.Empty;
             for ( int i = 0; i < reactiveSystem.ReactiveAttributes.Count; i++ ) {
                 reactiveUpdatesAddedRemovedInsert += "\n" + ReplaceKeywords(
                     ReactiveSystemTemplates.GetTemplateForSystemUpdateAddedRemoved(),
@@ -45,6 +47,7 @@ namespace ReactiveDotsPlugin
             }
 
             var source = globalTemplate
+                .Replace( "$$placeForUsings$$", usingsInsert )
                 .Replace( "$$namespace$$", reactiveSystem.SystemNamespace )
                 .Replace( "$$systemNameFull$$", reactiveSystem.SystemNameFull )
                 .Replace( "$$systemName$$", reactiveSystem.SystemName )
@@ -61,8 +64,21 @@ namespace ReactiveDotsPlugin
                 .Replace( "$$systemName$$", systemInfo.SystemName )
                 .Replace( "$$componentName$$", systemInfo.ReactiveAttributes[attributeIndex].ComponentName )
                 .Replace( "$$componentNameFull$$", systemInfo.ReactiveAttributes[attributeIndex].ComponentNameFull )
-                .Replace( "$$reactiveComponentNameFull$$", systemInfo.ReactiveAttributes[attributeIndex].ReactiveComponentNameFull )
-                .Replace( "$$variableNameToCompare$$", systemInfo.ReactiveAttributes[attributeIndex].FieldToCompareName );
+                .Replace( "$$reactiveComponentNameFull$$",
+                    systemInfo.ReactiveAttributes[attributeIndex].ReactiveComponentNameFull )
+                .Replace( "$$variableNameToCompare$$",
+                    systemInfo.ReactiveAttributes[attributeIndex].FieldToCompareName );
+        }
+
+        private HashSet<string> GetCommonUsings()
+        {
+            var set = new HashSet<string>();
+            set.Add( "System" );
+            set.Add( "System.Collections.Generic" );
+            set.Add( "Unity.Collections" );
+            set.Add( "Unity.Entities" );
+            set.Add( "ReactiveDots" );
+            return set;
         }
     }
 }

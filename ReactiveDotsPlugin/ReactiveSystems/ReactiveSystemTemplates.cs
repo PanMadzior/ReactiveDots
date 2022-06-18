@@ -143,10 +143,7 @@
         public static string GetGlobalTemplate()
         {
             return @"// Auto Generated Code
-using System.Collections.Generic;
-using Unity.Collections;
-using Unity.Entities;
-using ReactiveDots;
+$$placeForUsings$$
 
 namespace $$namespace$$
 {

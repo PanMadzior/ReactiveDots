@@ -12,7 +12,8 @@
         "Unity.Jobs",
         "Unity.Mathematics",
         "Unity.Entities.Tests",
-        "Unity.Entities.Editor.Tests"
+        "Unity.Entities.Editor.Tests",
+        "ReactiveDots.Tests.SecondAssembly"
     ],
     "includePlatforms": [
         "Editor"

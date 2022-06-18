@@ -10,8 +10,7 @@ namespace ReactiveDotsPlugin
 
         public string ComponentName { private set; get; }
         public string ComponentNameFull { private set; get; }
-        public string ComponentNamespace { private set; get; }
-        public StructDeclarationSyntax ComponentStructSyntax { private set; get; }
+        public string ComponentVisibleNamespace { private set; get; }
 
         public string ReactiveComponentName { private set; get; }
         public string ReactiveComponentNameFull { private set; get; }
@@ -29,7 +28,7 @@ namespace ReactiveDotsPlugin
             SystemClassSyntax = system;
             if ( attribute.ArgumentList != null ) {
                 if ( attribute.ArgumentList.Arguments.Count >= 1 )
-                    GetComponentInfo( context, attribute, system );
+                    GetComponentInfo( attribute );
                 if ( attribute.ArgumentList.Arguments.Count >= 2 )
                     GetReactiveComponentInfo( context, attribute, system );
             }
@@ -42,8 +41,8 @@ namespace ReactiveDotsPlugin
         {
             ReactiveComponentName =
                 GeneratorUtils.GetTypeofFromAttributeArgument( attribute.ArgumentList.Arguments[1] );
-            if ( GeneratorUtils.TryFindStructSyntaxByName( context, ReactiveComponentName,
-                    out var structSyntax ) ) {
+            if ( GeneratorUtils.TryFindStructSyntaxByName( context, ReactiveComponentName, out var structSyntax,
+                    system ) ) {
                 ReactiveComponentStructSyntax = structSyntax;
                 ReactiveComponentNamespace    = GeneratorUtils.GetNamespaceFor( structSyntax );
                 ReactiveComponentNameFull     = GeneratorUtils.GetFullName( structSyntax );
@@ -56,21 +55,16 @@ namespace ReactiveDotsPlugin
             }
         }
 
-        private void GetComponentInfo( GeneratorExecutionContext context, AttributeSyntax attribute,
-            ClassDeclarationSyntax system )
+        private void GetComponentInfo( AttributeSyntax attribute )
         {
-            ComponentName =
+            ComponentNameFull =
                 GeneratorUtils.GetTypeofFromAttributeArgument( attribute.ArgumentList.Arguments[0] );
-            if ( GeneratorUtils.TryFindStructSyntaxByName( context, ComponentName, out var structSyntax ) ) {
-                ComponentStructSyntax = structSyntax;
-                ComponentNamespace    = GeneratorUtils.GetNamespaceFor( structSyntax );
-                ComponentNameFull     = GeneratorUtils.GetFullName( structSyntax );
-            }
-            else {
-                ComponentNamespace = GeneratorUtils.GetNamespaceFor( system );
-                ComponentNameFull = string.IsNullOrEmpty( ComponentNamespace )
-                    ? ComponentName
-                    : ComponentNamespace + "." + ComponentName;
+            var split = ComponentNameFull.Split( '.' );
+            ComponentName             = split[split.Length - 1];
+            ComponentVisibleNamespace = string.Empty;
+            if ( split.Length >= 2 ) {
+                for ( int i = 0; i < split.Length - 1; i++ )
+                    ComponentVisibleNamespace += split[i] + ( i < split.Length - 2 ? "." : "" );
             }
         }
     }

@@ -34,50 +34,6 @@ namespace ReactiveDotsPlugin
 
         private void GenerateEventSystem( GeneratorExecutionContext context, EventSystemInfo eventSystem )
         {
-            // var usingsInsert                      = GetUsings( context, eventSystem );
-            // var globalTemplate                    = EventSystemTemplates.GetEventSystemMainTemplate();
-            // var reactiveUpdatesChangedInsert      = string.Empty;
-            // var reactiveUpdatesAddedRemovedInsert = string.Empty;
-            // var reactiveComponentProcessorsInsert = string.Empty;
-            // var reactiveComponentsInsert          = string.Empty;
-            // var componentEventsInsert             = string.Empty;
-            // var eventFiresInsert                  = string.Empty;
-            //
-            // for ( int i = 0; i < components.Count; i++ ) {
-            //     if ( !generatedReactiveComponents.Contains( components[i].ComponentNameFull ) ) {
-            //         reactiveUpdatesAddedRemovedInsert += "\n" + ReplaceKeywords(
-            //             ReactiveSystemTemplates.GetTemplateForSystemUpdateAddedRemoved(),
-            //             eventSystem, components[i] );
-            //         reactiveUpdatesChangedInsert += "\n" + ReplaceKeywords(
-            //             ReactiveSystemTemplates.GetTemplateForSystemUpdate(),
-            //             eventSystem, components[i] );
-            //         reactiveComponentProcessorsInsert += "\n" + ReplaceKeywords(
-            //             ReactiveSystemTemplates.GetTemplateForComponent(),
-            //             eventSystem, components[i] );
-            //         reactiveComponentsInsert += "\n" + ReplaceKeywords(
-            //             ReactiveSystemTemplates.GetTemplateForReactiveComponent(),
-            //             eventSystem, components[i] );
-            //         generatedReactiveComponents.Add( components[i].ComponentNameFull );
-            //     }
-            //
-            //     componentEventsInsert += "\n" + ReplaceKeywords( EventSystemTemplates.GetEventComponentJobsTemplate(),
-            //         eventSystem, components[i] );
-            //     eventFiresInsert += "\n" + ReplaceKeywords( EventSystemTemplates.GetTemplateForEventFire(),
-            //         eventSystem, components[i] );
-            // }
-            //
-            // var source = globalTemplate
-            //     .Replace( "$$placeForUsings", usingsInsert )
-            //     .Replace( "$$namespace$$", eventSystem.SystemNamespace )
-            //     .Replace( "$$systemNameFull$$", eventSystem.SystemNameFull )
-            //     .Replace( "$$systemName$$", eventSystem.SystemName )
-            //     .Replace( "$$placeForUpdatesAddedRemoved$$", reactiveUpdatesAddedRemovedInsert )
-            //     .Replace( "$$placeForUpdatesChanged$$", reactiveUpdatesChangedInsert )
-            //     .Replace( "$$placeForReactiveComponents$$", reactiveComponentsInsert )
-            //     .Replace( "$$placeForComponents$$", reactiveComponentProcessorsInsert )
-            //     .Replace( "$$placeForComponentEvents$$", componentEventsInsert )
-            //     .Replace( "$$placeForEventFires$$", eventFiresInsert );
-
             var usingsInsert   = GetUsings( context, eventSystem.ClassSyntax );
             var globalTemplate = EventSystemTemplates.GetEventSystemMainTemplate();
             var source = globalTemplate

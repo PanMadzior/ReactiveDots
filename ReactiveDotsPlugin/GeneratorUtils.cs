@@ -35,14 +35,31 @@ namespace ReactiveDotsPlugin
         }
 
         public static bool TryFindStructSyntaxByName( GeneratorExecutionContext context, string structName,
-            out StructDeclarationSyntax? structSyntax )
+            out StructDeclarationSyntax? structSyntax, TypeDeclarationSyntax optionalPreferredParent = null )
         {
-            structSyntax = context.Compilation.SyntaxTrees
+            var allFound = context.Compilation.SyntaxTrees
                 .SelectMany( st => st
                     .GetRoot()
                     .DescendantNodes()
                     .OfType<StructDeclarationSyntax>() )
-                .FirstOrDefault( str => str.Identifier.Text.Equals( structName ) ) ?? null;
+                .Where( str => str.Identifier.Text.Equals( structName ) )
+                .ToList();
+            if ( allFound.Count == 0 )
+                structSyntax = null;
+            else if ( allFound.Count == 1 || optionalPreferredParent == null )
+                structSyntax = allFound[0];
+            else {
+                structSyntax = allFound.FirstOrDefault( s =>
+                {
+                    var parentSyntax = s.Parent as TypeDeclarationSyntax;
+                    if ( parentSyntax == null )
+                        return false;
+                    return parentSyntax.Identifier.Text.Equals( optionalPreferredParent.Identifier.Text );
+                } );
+                if ( structSyntax == null )
+                    structSyntax = allFound[0];
+            }
+
             return structSyntax != null;
         }
 
@@ -126,6 +143,17 @@ namespace ReactiveDotsPlugin
                     continue;
                 set.Add( str );
             }
+        }
+
+        public static string GetUsingsInsert( GeneratorExecutionContext context, TypeDeclarationSyntax type,
+            HashSet<string>? additional = null )
+        {
+            var usings = additional == null ? new HashSet<string>() : new HashSet<string>( additional );
+            GeneratorUtils.PopulateSetWithUniqueUsings( usings, type, context );
+            var usingsInsert = string.Empty;
+            foreach ( var u in usings )
+                usingsInsert += "using " + u + ";\n";
+            return usingsInsert;
         }
     }
 }
