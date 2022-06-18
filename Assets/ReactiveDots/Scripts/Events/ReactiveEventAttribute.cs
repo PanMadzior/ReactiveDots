@@ -5,19 +5,19 @@ namespace ReactiveDots
     [AttributeUsage( validOn: AttributeTargets.Struct | AttributeTargets.Class, AllowMultiple = true )]
     public class ReactiveEventAttribute : Attribute
     {
-        public EventType EventType { get; private set; }
-        public Type EventSystemType { get; private set; }
-        public string FieldNameToCompare = "Value";
+        public EventType EventType { get; protected set; }
+        public Type EventSystemType { get; protected set; }
+        public string FieldNameToCompare { get; protected set; } = "Value";
 
-        public ReactiveEventAttribute( EventType type = EventType.All )
+        public ReactiveEventAttribute( EventType eventType = EventType.All )
         {
-            EventType       = type;
+            EventType       = eventType;
             EventSystemType = typeof(ReactiveDots.DefaultEventSystem);
         }
 
-        public ReactiveEventAttribute( EventType type, Type eventSystem )
+        public ReactiveEventAttribute( EventType eventType, Type eventSystem )
         {
-            EventType       = type;
+            EventType       = eventType;
             EventSystemType = eventSystem;
         }
     }

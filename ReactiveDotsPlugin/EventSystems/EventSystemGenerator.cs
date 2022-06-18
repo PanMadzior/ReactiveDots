@@ -46,11 +46,11 @@ namespace ReactiveDotsPlugin
 
         private void GenerateComponentInterfaces( GeneratorExecutionContext context, EventComponentInfo eventComponent )
         {
-            var usingsInsert   = GetUsings( context, eventComponent.StructSyntax );
+            var usingsInsert   = GetUsings( context, eventComponent.DeclaredOn );
             var globalTemplate = EventSystemTemplates.GetComponentInterfacesTemplate();
             var source = globalTemplate
                 .Replace( "$$placeForUsings$$", usingsInsert )
-                .Replace( "$$namespace$$", eventComponent.ComponentNamespace )
+                .Replace( "$$namespace$$", eventComponent.ComponentVisibleNamespace )
                 .Replace( "$$systemName$$", eventComponent.EventSystemClassName )
                 .Replace( "$$systemNameFull$$", eventComponent.EventSystemClassNameFull )
                 .Replace( "$$componentName$$", eventComponent.ComponentName )
@@ -62,13 +62,13 @@ namespace ReactiveDotsPlugin
 
         private void GenerateComponentJobs( GeneratorExecutionContext context, EventComponentInfo eventComponent )
         {
-            var usingsInsert                      = GetUsings( context, eventComponent.StructSyntax );
+            var usingsInsert                      = GetUsings( context, eventComponent.DeclaredOn );
             var globalTemplate                    = EventSystemTemplates.GetComponentJobsTemplate();
             var reactiveComponentProcessorsInsert = GetReactiveJobsInsert( eventComponent );
             var reactiveComponentDeclaration      = GetReactiveDeclarationInsert( eventComponent );
             var source = globalTemplate
                 .Replace( "$$placeForUsings$$", usingsInsert )
-                .Replace( "$$namespace$$", eventComponent.ComponentNamespace )
+                .Replace( "$$namespace$$", eventComponent.ComponentVisibleNamespace )
                 .Replace( "$$systemName$$", eventComponent.EventSystemClassName )
                 .Replace( "$$systemNameFull$$", eventComponent.EventSystemClassNameFull )
                 .Replace( "$$componentName$$", eventComponent.ComponentName )

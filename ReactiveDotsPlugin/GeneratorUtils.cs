@@ -155,5 +155,16 @@ namespace ReactiveDotsPlugin
                 usingsInsert += "using " + u + ";\n";
             return usingsInsert;
         }
+
+        public static void SplitTypeName( string full, out string visibleNamespace, out string name )
+        {
+            var split = full.Split( '.' );
+            name             = split[split.Length - 1];
+            visibleNamespace = string.Empty;
+            if ( split.Length >= 2 ) {
+                for ( int i = 0; i < split.Length - 1; i++ )
+                    visibleNamespace += split[i] + ( i < split.Length - 2 ? "." : "" );
+            }
+        }
     }
 }

@@ -19,19 +19,19 @@ namespace ReactiveDotsSample
         public void OnAnyBouncesAdded( Entity entity, Bounces bounces, World world )
         {
             Debug.Log(
-                $"New bounce #{bounces.Value} by entity with id={world.EntityManager.GetComponentData<Id>( entity ).Value}" );
+                $"New bounce #{bounces.Value} for entity with id={world.EntityManager.GetComponentData<Id>( entity ).Value}" );
         }
 
         public void OnAnyBouncesChanged( Entity entity, Bounces bounces, World world )
         {
             Debug.Log(
-                $"Updated bounce #{bounces.Value} by entity with id={world.EntityManager.GetComponentData<Id>( entity ).Value}" );
+                $"Updated bounce #{bounces.Value} for entity with id={world.EntityManager.GetComponentData<Id>( entity ).Value}" );
         }
 
         public void OnAnyBouncesRemoved( Entity entity, World world )
         {
             Debug.Log(
-                $"Bounce removed in entity with id={world.EntityManager.GetComponentData<Id>( entity ).Value}" );
+                $"Bounce removed from entity with id={world.EntityManager.GetComponentData<Id>( entity ).Value}" );
         }
     }
 }

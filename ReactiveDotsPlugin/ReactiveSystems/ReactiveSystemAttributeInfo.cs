@@ -59,13 +59,9 @@ namespace ReactiveDotsPlugin
         {
             ComponentNameFull =
                 GeneratorUtils.GetTypeofFromAttributeArgument( attribute.ArgumentList.Arguments[0] );
-            var split = ComponentNameFull.Split( '.' );
-            ComponentName             = split[split.Length - 1];
-            ComponentVisibleNamespace = string.Empty;
-            if ( split.Length >= 2 ) {
-                for ( int i = 0; i < split.Length - 1; i++ )
-                    ComponentVisibleNamespace += split[i] + ( i < split.Length - 2 ? "." : "" );
-            }
+            GeneratorUtils.SplitTypeName( ComponentNameFull, out var visibleNamespace, out var componentName );
+            ComponentVisibleNamespace = visibleNamespace;
+            ComponentName             = componentName;
         }
     }
 }

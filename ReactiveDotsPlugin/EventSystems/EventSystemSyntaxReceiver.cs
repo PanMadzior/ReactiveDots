@@ -22,6 +22,13 @@ namespace ReactiveDotsPlugin
                     EventComponents.Add( new EventComponentInfo( structNode, attribute ) );
                 }
             }
+
+            if ( syntaxNode is TypeDeclarationSyntax typeNode ) {
+                GeneratorUtils.GetAttributes( typeNode, "ReactiveEventFor", out var attributes );
+                foreach ( var attribute in attributes ) {
+                    EventComponents.Add( new EventComponentInfo( typeNode, attribute ) );
+                }
+            }
         }
     }
 }
