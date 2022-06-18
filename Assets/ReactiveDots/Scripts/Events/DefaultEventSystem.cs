@@ -2,6 +2,9 @@
 
 namespace ReactiveDots
 {
+    /// <summary>
+    /// System which handles event changes by default.
+    /// </summary>
     [UpdateInGroup( typeof(LateSimulationSystemGroup) )]
     [AlwaysUpdateSystem]
     [ReactiveEventSystem]
@@ -16,6 +19,7 @@ namespace ReactiveDots
         protected override void OnUpdate()
         {
             Dependency = UpdateReactive( Dependency );
+            // TODO: remove following line, but first generated plain foreaches has to rewritten to jobs I guess
             Dependency.Complete();
             Dependency = FireEvents( Dependency );
         }

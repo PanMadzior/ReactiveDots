@@ -24,7 +24,7 @@ namespace ReactiveDots
                     m.GetCustomAttributes( typeof(InitWithAttribute), false )
                         .Any( a => ( (InitWithAttribute)a ).SystemType == system.GetType() ) )
                 .ToList()
-                .ForEach( m => m.Invoke( system, new[] { system } ) );
+                .ForEach( m => m.Invoke( system, new object[] { system } ) );
         }
     }
 }
