@@ -166,5 +166,57 @@ namespace ReactiveDotsPlugin
                     visibleNamespace += split[i] + ( i < split.Length - 2 ? "." : "" );
             }
         }
+
+        public struct TypeNames
+        {
+            public string? Name;
+            public string? NamespaceWithContainingTypes;
+            public string? FullName;
+        }
+
+        public static TypeNames GetTypeNamesFromAttributeArgument( GeneratorExecutionContext context,
+            AttributeArgumentSyntax arg )
+        {
+            var typeofExpr = arg.Expression as TypeOfExpressionSyntax;
+            if ( typeofExpr == null )
+                return default(TypeNames);
+            return GetTypeNamesFromTypeofDeclaration( context, typeofExpr );
+        }
+
+        public static TypeNames GetTypeNamesFromTypeofDeclaration( GeneratorExecutionContext context,
+            TypeOfExpressionSyntax expr )
+        {
+            var typeNames     = new TypeNames();
+            var typeInfo      = context.Compilation.GetSemanticModel( expr.Type.SyntaxTree ).GetTypeInfo( expr.Type );
+            var namedSymbol   = typeInfo.Type as INamedTypeSymbol;
+            var typeNamespace = namedSymbol?.ContainingNamespace.ToString();
+            var typeParents   = string.Empty;
+            var parent        = namedSymbol?.ContainingType;
+            while ( parent != null ) {
+                typeParents += parent.Name;
+                parent      =  parent.ContainingType;
+                if ( parent != null )
+                    typeParents += ".";
+            }
+
+            // type name
+            typeNames.Name = namedSymbol?.Name;
+
+            // type path (namespace + containing types)
+            typeNames.NamespaceWithContainingTypes =
+                ( string.IsNullOrEmpty( typeNamespace ) ? "" : typeNamespace + "." )
+                + ( string.IsNullOrEmpty( typeParents ) ? "" : typeParents + "." );
+            if ( typeNames.NamespaceWithContainingTypes.EndsWith( "." ) )
+                typeNames.NamespaceWithContainingTypes =
+                    typeNames.NamespaceWithContainingTypes.Substring( 0,
+                        typeNames.NamespaceWithContainingTypes.Length - 1 );
+
+            // type path + type name
+            typeNames.FullName = ( string.IsNullOrEmpty( typeNames.NamespaceWithContainingTypes )
+                ? typeNames.Name
+                : typeNames.NamespaceWithContainingTypes + "." + typeNames.Name );
+
+            return typeNames;
+        }
     }
 }

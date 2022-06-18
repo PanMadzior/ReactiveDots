@@ -18,6 +18,7 @@ namespace ReactiveDotsPlugin
             var receiver = context.SyntaxReceiver as EventSystemSyntaxReceiver;
             try {
                 foreach ( var eventComponent in receiver.EventComponents ) {
+                    eventComponent.UpdateWithContext( context );
                     GenerateComponentInterfaces( context, eventComponent );
                     GenerateComponentJobs( context, eventComponent );
                 }
@@ -48,7 +49,7 @@ namespace ReactiveDotsPlugin
             var globalTemplate = EventSystemTemplates.GetComponentInterfacesTemplate();
             var source = globalTemplate
                 .Replace( "$$placeForUsings$$", usingsInsert )
-                .Replace( "$$namespace$$", eventComponent.ComponentVisibleNamespace )
+                .Replace( "$$namespace$$", eventComponent.ComponentNamespace )
                 .Replace( "$$systemName$$", eventComponent.EventSystemClassName )
                 .Replace( "$$systemNameFull$$", eventComponent.EventSystemClassNameFull )
                 .Replace( "$$componentName$$", eventComponent.ComponentName )
@@ -66,7 +67,7 @@ namespace ReactiveDotsPlugin
             var reactiveComponentDeclaration = GetReactiveDeclarationInsert( eventComponent );
             var source = globalTemplate
                 .Replace( "$$placeForUsings$$", usingsInsert )
-                .Replace( "$$namespace$$", eventComponent.ComponentVisibleNamespace )
+                .Replace( "$$namespace$$", eventComponent.ComponentNamespace )
                 .Replace( "$$systemName$$", eventComponent.EventSystemClassName )
                 .Replace( "$$systemNameFull$$", eventComponent.EventSystemClassNameFull )
                 .Replace( "$$componentName$$", eventComponent.ComponentName )

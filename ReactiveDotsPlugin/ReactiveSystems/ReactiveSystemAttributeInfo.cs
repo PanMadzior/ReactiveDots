@@ -9,13 +9,12 @@ namespace ReactiveDotsPlugin
         public ClassDeclarationSyntax SystemClassSyntax { private set; get; }
 
         public string ComponentName { private set; get; }
+        public string ComponentNamespace { private set; get; }
         public string ComponentNameFull { private set; get; }
-        public string ComponentVisibleNamespace { private set; get; }
 
         public string ReactiveComponentName { private set; get; }
-        public string ReactiveComponentNameFull { private set; get; }
         public string ReactiveComponentNamespace { private set; get; }
-        public StructDeclarationSyntax ReactiveComponentStructSyntax { private set; get; }
+        public string ReactiveComponentNameFull { private set; get; }
 
         public string FieldToCompareName { private set; get; }
 
@@ -28,40 +27,28 @@ namespace ReactiveDotsPlugin
             SystemClassSyntax = system;
             if ( attribute.ArgumentList != null ) {
                 if ( attribute.ArgumentList.Arguments.Count >= 1 )
-                    GetComponentInfo( attribute );
+                    GetComponentInfo( context, attribute.ArgumentList.Arguments[0] );
                 if ( attribute.ArgumentList.Arguments.Count >= 2 )
-                    GetReactiveComponentInfo( context, attribute, system );
+                    GetReactiveComponentInfo( context, attribute.ArgumentList.Arguments[1] );
             }
 
             FieldToCompareName = GeneratorUtils.GetAttributeArgumentValue( attribute, "FieldNameToCompare", "Value" );
         }
 
-        private void GetReactiveComponentInfo( GeneratorExecutionContext context, AttributeSyntax attribute,
-            ClassDeclarationSyntax system )
+        private void GetComponentInfo( GeneratorExecutionContext context, AttributeArgumentSyntax arg )
         {
-            ReactiveComponentName =
-                GeneratorUtils.GetTypeofFromAttributeArgument( attribute.ArgumentList.Arguments[1] );
-            if ( GeneratorUtils.TryFindStructSyntaxByName( context, ReactiveComponentName, out var structSyntax,
-                    system ) ) {
-                ReactiveComponentStructSyntax = structSyntax;
-                ReactiveComponentNamespace    = GeneratorUtils.GetNamespaceFor( structSyntax );
-                ReactiveComponentNameFull     = GeneratorUtils.GetFullName( structSyntax );
-            }
-            else {
-                ReactiveComponentNamespace = GeneratorUtils.GetNamespaceFor( system );
-                ReactiveComponentNameFull = string.IsNullOrEmpty( ReactiveComponentNamespace )
-                    ? ReactiveComponentName
-                    : ReactiveComponentNamespace + "." + ReactiveComponentName;
-            }
+            var compNames = GeneratorUtils.GetTypeNamesFromAttributeArgument( context, arg );
+            ComponentName      = compNames.Name;
+            ComponentNamespace = compNames.NamespaceWithContainingTypes;
+            ComponentNameFull  = compNames.FullName;
         }
 
-        private void GetComponentInfo( AttributeSyntax attribute )
+        private void GetReactiveComponentInfo( GeneratorExecutionContext context, AttributeArgumentSyntax arg )
         {
-            ComponentNameFull =
-                GeneratorUtils.GetTypeofFromAttributeArgument( attribute.ArgumentList.Arguments[0] );
-            GeneratorUtils.SplitTypeName( ComponentNameFull, out var visibleNamespace, out var componentName );
-            ComponentVisibleNamespace = visibleNamespace;
-            ComponentName             = componentName;
+            var compNames = GeneratorUtils.GetTypeNamesFromAttributeArgument( context, arg );
+            ReactiveComponentName      = compNames.Name;
+            ReactiveComponentNamespace = compNames.NamespaceWithContainingTypes;
+            ReactiveComponentNameFull  = compNames.FullName;
         }
     }
 }

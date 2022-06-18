@@ -4,7 +4,7 @@ using Unity.Entities;
 
 namespace ReactiveDots.Tests
 {
-    [ReactiveEventFor( typeof(ReactiveDots.Tests.SecondTestAssembly.OtherAssemblyTestEventComponent) )]
+    [ReactiveEventFor( typeof(OtherAssemblyTestEventComponent) )]
     public class ForComponentEventSystemTests : TestBase, IAnyOtherAssemblyTestEventComponentAddedListener,
         IAnyOtherAssemblyTestEventComponentChangedListener,
         IAnyOtherAssemblyTestEventComponentRemovedListener

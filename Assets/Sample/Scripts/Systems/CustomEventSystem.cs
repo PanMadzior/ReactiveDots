@@ -3,7 +3,7 @@ using Unity.Entities;
 
 namespace ReactiveDotsSample
 {
-    [ReactiveEventFor( typeof(ReactiveDotsSample.Speed), EventType.All, typeof(ReactiveDotsSample.CustomEventSystem) )]
+    [ReactiveEventFor( typeof(Speed), EventType.All, typeof(CustomEventSystem) )]
     [UpdateInGroup( typeof(LateSimulationSystemGroup) )]
     [AlwaysUpdateSystem]
     [ReactiveEventSystem]

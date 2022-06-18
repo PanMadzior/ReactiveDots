@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using Unity.Entities;
-using UnityEngine;
 
 namespace ReactiveDots.Tests
 {
