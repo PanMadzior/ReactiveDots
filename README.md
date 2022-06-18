@@ -122,22 +122,22 @@ By default all event listeners are managed by `ReactiveDots.DefaultEventSystem` 
 
 Use attribute constructor when marking event components to change which system should manage it: `[ReactiveEvent( EventType.All, typeof(Your.Custom.EventSystem) )]`.
 
+**Very important note:** When setting a custom event system in the attribute **use a class name with full namespace path**. Since event systems and event components may be in different assemblies it is needed during a source generation phase to use a full name of the system.
+
 ### Self vs Any events
 *Feature not yet implemented.*
 
 Difference is simple. `Any` event listeners react to changes in all entities, when `Self` event listeners react only to changes in the same entity the listener component is attached to. In other words, `Self` listeners react to changes in the specified entities.
 
-**Very important note:** When setting a custom event event system in the attribute **use a class name with full namespace path**. Since event systems and event components may be in different assemblies it is needed during a source generation phase to use a full name of the system.
-
 ### Main thread
-Event listener components are managed components because they hold interface instance references. Therefore invoking interface methods have to be on the main thread. Invoking them in jobs doesn't make much sense anyway. Bear in mind that many events, especially these which fires frequently, may have bad impact on your games' performance. 
+Event listener components are managed components because they hold interface instance references. Therefore invoking interface methods have to be done on the main thread. Invoking them in jobs doesn't make much sense anyway. Bear in mind that many events, especially these which fires frequently, may have bad impact on your game performance. 
 
 # Known issues and limitations
-- Reactive systems can react to changes of the components in the same assembly. It should be easy to fix. Event systems use some magic to overcome this limitation.
+- Reactive systems can react to changes of the components in the same assembly only. It should be easy to fix. Event systems use some magic to overcome this limitation.
 - You cannot make events for components which you can't mark with an attribute. Workaround would be to introduce other way to mark said components.
 - Component add and remove checks are done in manual iterations in simple foreach loops with structural changes. It would be nice to rewrite them into jobs and maybe use command buffers for structural changes.
 - Reactive system's internal `IEntityBatchJob`, which checks for component changes, use some unity internal methods (like `InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr`) for getting pointers to the component arrays. This way a job's performance is the same (or almost the same) as unity generated foreaches. I'm not sure if I should use said methods or something different. It works tho.
-- Event systems have to do `Dependency.Complete()` between updating reactive components and firing events. It should be easy to fix if event fires was some kind of main thread job, instead of plain foreach. This way it could use dependency management.
+- Event systems have to do `Dependency.Complete()` between updating reactive components and firing events. It should be easy to fix if event fires were done in some kind of main thread job, instead of a plain foreach. This way it could use dependency management.
 - Reactive components have to be written manually. You cannot generate components if you want to use them in ecs foreaches. Unity source generators do some magic on the component types under the hood. This forces some extra boilerplate code.
 - Some of the generated code are static singletons which hurt my heart. Would be great to make it more manageable and possibly without singletons.
 - Some of the generated code needs some cleaning.
@@ -145,7 +145,7 @@ Event listener components are managed components because they hold interface ins
 
 # Planned features
 There are some features that may come to the ReactiveDots in the future.
-- **Multi-assemly reactive systems** which will allow reacting on components from different (than system) assemblies.
+- **Multi-assembly reactive systems** which will allow reacting on components from different (than system) assemblies.
 - **Self events** which react only to changes in the specified entities.
 - **External events** - a way to mark components from other assemblies to be events without a need to mark them directly with an attribute.
 - **Cleanup** systems that will help destroying entities with selected components or removing these components.
