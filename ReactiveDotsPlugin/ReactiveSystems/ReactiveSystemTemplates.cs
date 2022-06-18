@@ -14,14 +14,14 @@
             public EntityQuery changedQuery;
         }
 
-        private static Dictionary<$$systemNameFull$$, InstanceData> Instances =
+        private static Dictionary<$$systemNameFull$$, InstanceData> s_instances =
             new Dictionary<$$systemNameFull$$, InstanceData>();
 
         private static InstanceData GetOrCreateInstanceData( $$systemNameFull$$ sys )
         {
-            if ( !Instances.ContainsKey( sys ) )
-                Instances.Add( sys, CreateInstanceData( sys ) );
-            return Instances[sys];
+            if ( !s_instances.ContainsKey( sys ) )
+                s_instances.Add( sys, CreateInstanceData( sys ) );
+            return s_instances[sys];
         }
 
         private static InstanceData CreateInstanceData( $$systemNameFull$$ sys )
@@ -49,12 +49,13 @@
             UpdateRemoved( sys, instanceData );
         }
 
-        public static Unity.Jobs.JobHandle UpdateReactive( $$systemNameFull$$ sys,
+        public static Unity.Jobs.JobHandle UpdateChanged( $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
         {
-            return GetReactiveUpdateJob( sys, out var query ).ScheduleParallel( query, dependency );
+            return GetReactiveUpdateChangedJob( sys, out var query ).ScheduleParallel( query, dependency );
         }
 
+        // TODO: change to job?
         private static void UpdateAdded( $$systemNameFull$$ sys, InstanceData instanceData )
         {
             var addedEntities = instanceData.addedQuery.ToEntityArray( Allocator.Temp );
@@ -73,6 +74,7 @@
             addedEntities.Dispose();
         }
 
+        // TODO: change to job?
         private static void UpdateRemoved( $$systemNameFull$$ sys, InstanceData instanceData )
         {
             var removedEntities = instanceData.removedQuery.ToEntityArray( Allocator.Temp );
@@ -91,19 +93,19 @@
             removedEntities.Dispose();
         }
 
-        private static ReactiveUpdateJob GetReactiveUpdateJob( $$systemNameFull$$ sys,
+        private static ReactiveUpdateChangedJob GetReactiveUpdateChangedJob( $$systemNameFull$$ sys,
             out EntityQuery query )
         {
             var instanceData = GetOrCreateInstanceData( sys );
             query = instanceData.changedQuery;
-            return new ReactiveUpdateJob() {
+            return new ReactiveUpdateChangedJob() {
                 compHandle  = sys.GetComponentTypeHandle<$$componentNameFull$$>( true ),
                 rCompHandle = sys.GetComponentTypeHandle<$$reactiveComponentNameFull$$>( false )
             };
         }
 
         [Unity.Burst.BurstCompile]
-        private struct ReactiveUpdateJob : IJobEntityBatch
+        private struct ReactiveUpdateChangedJob : IJobEntityBatch
         {
             [ReadOnly]
             public ComponentTypeHandle<$$componentNameFull$$> compHandle;
@@ -175,7 +177,7 @@ $$placeForComponents$$
 
         public static string GetTemplateForSystemUpdate()
         {
-            return "            dependency = $$systemName$$_$$componentName$$_Reactive.UpdateReactive( sys, dependency );";
+            return "            dependency = $$systemName$$_$$componentName$$_Reactive.UpdateChanged( sys, dependency );";
         }
 
         public static string GetTemplateForReactiveComponent()

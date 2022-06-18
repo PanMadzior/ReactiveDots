@@ -32,11 +32,11 @@ namespace $$namespace$$
         }
 
         public void RegisterEventComponent( Action<$$systemName$$> updateAddedRemoved, 
-            Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> updateReactive,
+            Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> updateChanged,
             Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> fireEvents )
         {
             _reactiveAddedRemovedUpdates.Add( updateAddedRemoved );
-            _reactiveChangedUpdates.Add( updateReactive );
+            _reactiveChangedUpdates.Add( updateChanged );
             _eventFires.Add( fireEvents );            
         }
 
@@ -112,14 +112,14 @@ $$placeForReactiveComponent$$
             public EntityQuery anyChangedQuery;
         }
 
-        private static Dictionary<$$systemNameFull$$, InstanceData> Instances =
+        private static Dictionary<$$systemNameFull$$, InstanceData> s_instances =
             new Dictionary<$$systemNameFull$$, InstanceData>();
 
         private static InstanceData GetOrCreateInstanceData( $$systemNameFull$$ sys )
         {
-            if ( !Instances.ContainsKey( sys ) )
-                Instances.Add( sys, CreateInstanceData( sys ) );
-            return Instances[sys];
+            if ( !s_instances.ContainsKey( sys ) )
+                s_instances.Add( sys, CreateInstanceData( sys ) );
+            return s_instances[sys];
         }
 
         private static InstanceData CreateInstanceData( $$systemNameFull$$ sys )
@@ -150,11 +150,12 @@ $$placeForReactiveComponent$$
         {
             sys.RegisterEventComponent(
                 $$systemName$$_$$componentName$$_Reactive.UpdateReactiveAddedRemoved,
-                $$systemName$$_$$componentName$$_Reactive.UpdateReactive,
+                $$systemName$$_$$componentName$$_Reactive.UpdateChanged,
                 $$systemName$$_$$componentName$$_ReactiveEvents.FireEvents
             );
         }
 
+        // TODO: change to job?
         public static Unity.Jobs.JobHandle FireEvents( $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
         {
