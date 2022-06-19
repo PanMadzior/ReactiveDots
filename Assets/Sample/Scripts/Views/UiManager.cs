@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ReactiveDots;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +12,8 @@ namespace ReactiveDotsSample
         public Button     spawnBallButton;
         public Button     spawnBalls100Button;
         public Button     spawnBalls10000Button;
+        public Toggle     eventSystemsToggle;
+        public Text       eventSystemInfo;
 
         private Entity _ballEntityPrefab;
 
@@ -19,6 +22,18 @@ namespace ReactiveDotsSample
             spawnBallButton.onClick.AddListener( SpawnBall );
             spawnBalls100Button.onClick.AddListener( () => SpawnBalls( 100 ) );
             spawnBalls10000Button.onClick.AddListener( () => SpawnBalls( 10000 ) );
+            eventSystemsToggle.onValueChanged.AddListener( ( _ ) => UpdateEventSystems() );
+            UpdateEventSystems();
+        }
+
+        private void UpdateEventSystems()
+        {
+            var enabled = eventSystemsToggle.isOn;
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<DefaultEventSystem>().Enabled = enabled;
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<CustomEventSystem>().Enabled  = enabled;
+            eventSystemInfo.text = enabled
+                ? "Event systems are now enabled. Disable them if you are testing a large number of entities."
+                : "Event systems are now disabled. Keep them disable if you are testing a large number of entities.";
         }
 
         private void SpawnBall()
