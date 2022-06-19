@@ -32,13 +32,21 @@ namespace ReactiveDotsPlugin
             var globalTemplate = ReactiveSystemTemplates.GetGlobalTemplate();
             var usingsInsert = GeneratorUtils.GetUsingsInsert( context, reactiveSystem.ClassSyntax, GetCommonUsings() );
             var reactiveUpdatesChangedInsert = string.Empty;
-            var reactiveUpdatesAddedRemovedInsert = string.Empty;
+            var reactiveUpdatesAddedRemovedInsert_WithoutEcb = string.Empty;
+            var reactiveUpdatesAddedRemovedInsert_WithTempEcb = string.Empty;
+            var reactiveUpdatesAddedRemovedInsert_WithExternalEcb = string.Empty;
             var reactiveComponentsInsert = string.Empty;
             for ( int i = 0; i < reactiveSystem.ReactiveAttributes.Count; i++ ) {
                 if ( !reactiveSystem.ReactiveAttributes[i].IsValid )
                     continue;
-                reactiveUpdatesAddedRemovedInsert += "\n" + ReplaceKeywords(
-                    ReactiveSystemTemplates.GetTemplateForSystemUpdateAddedRemoved(),
+                reactiveUpdatesAddedRemovedInsert_WithoutEcb += "\n" + ReplaceKeywords(
+                    ReactiveSystemTemplates.GetTemplateForSystemUpdateAddedRemoved_WithoutEcb(),
+                    reactiveSystem, i );
+                reactiveUpdatesAddedRemovedInsert_WithTempEcb += "\n" + ReplaceKeywords(
+                    ReactiveSystemTemplates.GetTemplateForSystemUpdateAddedRemoved_WithTempEcb(),
+                    reactiveSystem, i );
+                reactiveUpdatesAddedRemovedInsert_WithExternalEcb += "\n" + ReplaceKeywords(
+                    ReactiveSystemTemplates.GetTemplateForSystemUpdateAddedRemoved_WithExternalEcb(),
                     reactiveSystem, i );
                 reactiveUpdatesChangedInsert += "\n" + ReplaceKeywords(
                     ReactiveSystemTemplates.GetTemplateForSystemUpdate(),
@@ -52,7 +60,10 @@ namespace ReactiveDotsPlugin
                 .Replace( "$$namespace$$", reactiveSystem.SystemNamespace )
                 .Replace( "$$systemNameFull$$", reactiveSystem.SystemNameFull )
                 .Replace( "$$systemName$$", reactiveSystem.SystemName )
-                .Replace( "$$placeForUpdatesAddedRemoved$$", reactiveUpdatesAddedRemovedInsert )
+                .Replace( "$$placeForUpdatesAddedRemoved_WithoutEcb$$", reactiveUpdatesAddedRemovedInsert_WithoutEcb )
+                .Replace( "$$placeForUpdatesAddedRemoved_WithTempEcb$$", reactiveUpdatesAddedRemovedInsert_WithTempEcb )
+                .Replace( "$$placeForUpdatesAddedRemoved_WithExternalEcb$$",
+                    reactiveUpdatesAddedRemovedInsert_WithExternalEcb )
                 .Replace( "$$placeForUpdatesChanged$$", reactiveUpdatesChangedInsert )
                 .Replace( "$$placeForComponents$$", reactiveComponentsInsert );
             context.AddSource( $"{reactiveSystem.SystemName}.Reactive.g.cs", SourceText.From( source, Encoding.UTF8 ) );

@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Unity.Entities;
+using Unity.Jobs;
 
 namespace ReactiveDots.Tests
 {
@@ -121,6 +122,14 @@ namespace ReactiveDots.Tests
         public struct TestComponentReactive : ISystemStateComponentData
         {
             public ComponentReactiveData<TestComponent> Value;
+        }
+
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+            GetEntityQuery(
+                ComponentType.Exclude<ReactiveDots.Tests.TestComponent>(),
+                ComponentType.ReadWrite<ReactiveDots.Tests.TestReactiveSystem.TestComponentReactive>() );
         }
 
         protected override void OnUpdate()
