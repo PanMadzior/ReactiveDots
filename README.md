@@ -116,19 +116,19 @@ public class Bar : MonoBehaviour,
     }
     
     // React when any entity got Foo component added...
-    public void OnAnyBouncesAdded( Entity entity, Foo foo, World world )
+    public void OnAnyFooAdded( Entity entity, Foo foo, World world )
     {
         Debug.Log( $"New foo component with value={foo.Value}" );
     }
     
     // ...or changed...
-    public void OnAnyBouncesChanged( Entity entity, Foo foo, World world )
+    public void OnAnyFooChanged( Entity entity, Foo foo, World world )
     {
         Debug.Log( $"Foo component updated value={foo.Value}" );
     }
     
     // ...or removed.
-    public void OnAnyBouncesRemoved( Entity entity, World world )
+    public void OnAnyFooRemoved( Entity entity, World world )
     {
         Debug.Log( "Foo component removed!" );
     }    
