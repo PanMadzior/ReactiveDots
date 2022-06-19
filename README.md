@@ -13,11 +13,12 @@ On daily basis I work with Entitas, where reactive systems are a core feature. F
 2. [Features](#features)
    1. [ReactiveSystems](#reactive-systems)
       1. [Boilerplate code](#boilerplate-code-for-reactive-system)
+      2. [How reactive systems work under the hood?](#how-reactive-systems-work-under-the-hood)
    2. [Event Listeners](#event-listeners)
       1. [Boilerplate code](#boilerplate-code-for-event-listener)
       2. [Self vs Any listeners](#self-vs-any-events)
       3. [Custom event system](#custom-event-system)
-      4. [Main thread](#main-thread)
+      4. [How event systems work under the hood?](#how-event-systems-work-under-the-hood)
 3. [Known issues and limitations](#known-issues-and-limitations)
 4. [Planned features](#planned-features)
 
@@ -73,6 +74,21 @@ You have to:
 3. Add `Dependency = this.UpdateReactive( Dependency );` at the beginning of the `OnUpdate()`.
 
 Optionally specify a name of a component field you want to use when deciding whether the component changed its value or not. Set it with *FieldNameToCompare* argument: `[ReactiveSystem( typeof(A), typeof(B), FieldNameToCompare = "CustomField" )]`. Default is `"Value"`. 
+
+### How reactive systems work under the hood?
+
+Source generators adds extra code to manage systems. You can inspect it in your IDE. Easiest way is to go to the declaration of the auto-generated extension method `UpdateReactive()`. But overall idea works like this:
+- User marks system to be reactive system.
+- User adds `ISystemStateComponentData` component which will cache main component reactive data.
+- When the main component is added to any entity which hasn't got the cache component, the cache component is added to the entity in auto-generated foreach. Cache component `.Added` value is set to true and actual value of the main component is cached in the `.PreviousValue` field.
+- Auto-generated parallel job (`IEntityBatchJob`) checks every update if the actual value of the main component is different than the cached `.PreviousValue`. If it is, `.Changed` field is set to true, otherwise to false. Actual value is yet again cached in the cache component.
+- If other auto-generated foreach finds an entity with the cache component but without the main one, it means that the component was removed or the entity was destroyed. In this case `.Removed` field in the cached component is set to true. In the next update the cache component will be removed aswell.
+
+Actual and cached values are compared only on one specified field, `.Value` by default. If any other field is changed, the system does not take it as a change. It is something that might be fixed in future updates.
+
+Additionally, you should be aware, that the cache component holds duplicate of the whole main component. If there are maaany reactive systems (and components they manage), it might have a bad impact on your game's memory usage.
+
+While job which checks if the component has changed since the last update is fast (thanks to the `IEntityBatchJob` and parallel execution) other two loops, for checking if the component is added or removed, are just plain loops with structural changes. It shouldn't be a problem if you don't add or remove reactive components too frequently (like many times per frame). You should often check if your game's performance isn't affected badly by reactive systems. In future releases this behaviour may be changed and optimized.
 
 ## Event Listeners
 Event listeners allow types outside of the ECS to react to component changes. Events are build on top of the reactive systems. Each listener implements an auto generated interface and register itself to listen to the desired event by creating an entity with a special component with a reference to the instance of said listener. 
@@ -155,10 +171,15 @@ public class Bar
 
 Difference is simple. `Any` event listeners react to changes in all entities, when `Self` event listeners react only to changes in the same entity the listener component is attached to. In other words, `Self` listeners react to changes in the specified entities.
 
-### Main thread
+### How event systems work under the hood?
+Event systems are built on top of the reactive systems. Check [how reactive systems work](#how-reactive-systems-work-under-the-hood) first. After the update of the reactive component data, event systems loops over entities with auto-generated event components and invokes methods of the interfaces referenced in the components.
+
+#### Main thread
 Event listener components are managed components because they hold interface instance references. Therefore invoking interface methods have to be done on the main thread. Invoking them in jobs doesn't make much sense anyway. Bear in mind that many events, especially these which fires frequently, may have bad impact on your game performance. 
 
 # Known issues and limitations
+- You can only react to changes of simple unmanaged `IComponentData` components and maybe `ISystemStateComponentData`. Managed components won't work. There is no support for buffers either.
+- Reactive systems does not work as intended when they are not marked as `[AlwaysUpdateSystem]`. Because of that, `[ReactiveSystem]` attribute derives from it, so you don't have to remember about that. I am not sure why is this a problem since systems register entity queries properly. Auto-generated jobs may be a problem here.
 - Component add and remove checks are done in manual iterations in simple foreach loops with structural changes. It would be nice to rewrite them into jobs and maybe use command buffers for structural changes.
 - Reactive system's internal `IEntityBatchJob`, which checks for component changes, use some unity internal methods (like `InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr`) for getting pointers to the component arrays. This way the job's performance is the same (or almost the same) as unity generated foreaches. I'm not sure if I should use said methods or something different. It works tho.
 - Event systems have to do `Dependency.Complete()` between updating reactive components and firing events. It should be easy to fix if event fires were done in some kind of main thread job, instead of a plain foreach. This way it could use dependency management.
