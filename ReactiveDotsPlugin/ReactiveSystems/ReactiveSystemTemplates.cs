@@ -12,6 +12,7 @@
             public EntityQuery addedQuery;
             public EntityQuery removedQuery;
             public EntityQuery changedQuery;
+            public EntityCommandBufferSystem ecbSystem;
         }
 
         private static Dictionary<$$systemNameFull$$, InstanceData> s_instances =
@@ -262,15 +263,33 @@ namespace $$namespace$$
 {
     public static class $$systemName$$_Reactive
     {
-        public static Unity.Jobs.JobHandle UpdateReactiveWithoutEcb( this $$systemNameFull$$ sys,
+        public static Unity.Jobs.JobHandle UpdateReactiveNowWithEntityManager( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
         { $$placeForUpdatesAddedRemoved_WithoutEcb$$ $$placeForUpdatesChanged$$
             return dependency;
         }
 
-        public static Unity.Jobs.JobHandle UpdateReactive( this $$systemNameFull$$ sys,
+        public static Unity.Jobs.JobHandle UpdateReactiveNowWithEcb( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
         { $$placeForUpdatesAddedRemoved_WithTempEcb$$ $$placeForUpdatesChanged$$
+            return dependency;
+        }
+
+        public static Unity.Jobs.JobHandle UpdateReactive( this $$systemNameFull$$ sys,
+            Unity.Jobs.JobHandle dependency )
+        {
+            // TODO: cache it maybe?
+            var defaultEcb = sys.World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+            return UpdateReactive( sys, dependency, defaultEcb );
+        }
+
+        public static Unity.Jobs.JobHandle UpdateReactive( this $$systemNameFull$$ sys,
+            Unity.Jobs.JobHandle dependency, EntityCommandBufferSystem ecbSystem )
+        {
+            var ecbForAdded   = ecbSystem.CreateCommandBuffer();
+            var ecbForRemoved = ecbSystem.CreateCommandBuffer();
+            dependency = UpdateReactive( sys, dependency, ecbForAdded, ecbForRemoved );
+            ecbSystem.AddJobHandleForProducer( dependency );
             return dependency;
         }
 
