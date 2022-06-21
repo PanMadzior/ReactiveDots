@@ -3,6 +3,7 @@ using Unity.Entities;
 
 namespace ReactiveDotsSample
 {
+    [UpdateAfter( typeof(BallMovementSystem) )]
     [ReactiveSystem( typeof(MoveDirection), typeof(MoveDirectionReactive) )]
     public partial class BounceCountSystem : SystemBase
     {
@@ -13,8 +14,8 @@ namespace ReactiveDotsSample
 
         public enum UpdateType
         {
-            WithoutEcb,
-            WithTempEcb,
+            NowWithEntityManager,
+            NowWithEcb,
             WithExternalEcb
         }
 
@@ -31,19 +32,31 @@ namespace ReactiveDotsSample
         protected override void OnUpdate()
         {
             switch ( updateType ) {
-                case UpdateType.WithoutEcb:
-                    Dependency = this.UpdateReactiveWithoutEcb( Dependency );
+                case UpdateType.NowWithEntityManager:
+                    Dependency = this.UpdateReactiveNowWithEntityManager( Dependency );
                     break;
-                case UpdateType.WithTempEcb:
-                    Dependency = this.UpdateReactive( Dependency );
+                case UpdateType.NowWithEcb:
+                    Dependency = this.UpdateReactiveNowWithEcb( Dependency );
                     break;
                 case UpdateType.WithExternalEcb:
-                    var ecbForAdded = _externalCommandBufferSystem.CreateCommandBuffer();
+                    var ecbForAdded   = _externalCommandBufferSystem.CreateCommandBuffer();
                     var ecbForRemoved = _externalCommandBufferSystem.CreateCommandBuffer();
                     Dependency = this.UpdateReactive( Dependency, ecbForAdded, ecbForRemoved );
                     _externalCommandBufferSystem.AddJobHandleForProducer( Dependency );
                     break;
             }
+
+            // Entities.WithNone<MoveDirectionReactive>().ForEach( ( in MoveDirection moveDir ) =>
+            //     {
+            //         Debug.Log( $"WithNone<> frame {UnityEngine.Time.frameCount}" );
+            //     } )
+            //     .Run();
+            //
+            // Entities.ForEach( ( in MoveDirectionReactive moveDirReactive ) =>
+            // {
+            //     if ( moveDirReactive.Value.Added )
+            //         Debug.Log( $".Added frame {UnityEngine.Time.frameCount}" );
+            // } ).Run();
 
             Entities.ForEach( ( ref Bounces bounces, in MoveDirectionReactive moveDirReactive ) =>
             {

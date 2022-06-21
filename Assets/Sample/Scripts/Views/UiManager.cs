@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ReactiveDots;
 using Unity.Collections;
 using Unity.Entities;
@@ -10,11 +11,14 @@ namespace ReactiveDotsSample
     public class UiManager : MonoBehaviour, IDeclareReferencedPrefabs, IConvertGameObjectToEntity
     {
         public GameObject ballsPrefab;
+        public Button     destroyAllBalls;
         public Button     spawnBallButton;
         public Button     spawnBalls100Button;
         public Button     spawnBalls10000Button;
         public Button     spawnBalls100000Button;
         public Button     spawnBalls1000000Button;
+        public Toggle     everyFrameSpawn;
+        public InputField everyFrameSpawnAmountField;
         public Toggle     eventSystemsToggle;
         public Text       eventSystemInfo;
         public Button     updateWithoutEcbButton;
@@ -25,29 +29,47 @@ namespace ReactiveDotsSample
 
         private void Awake()
         {
+            destroyAllBalls.onClick.AddListener( DestroyAllBalls );
             spawnBallButton.onClick.AddListener( () => SpawnBalls( 1 ) );
             spawnBalls100Button.onClick.AddListener( () => SpawnBalls( 100 ) );
             spawnBalls10000Button.onClick.AddListener( () => SpawnBalls( 10000 ) );
             spawnBalls100000Button.onClick.AddListener( () => SpawnBalls( 100000 ) );
             spawnBalls1000000Button.onClick.AddListener( () => SpawnBalls( 1000000 ) );
             eventSystemsToggle.onValueChanged.AddListener( ( _ ) => UpdateEventSystems() );
-            updateWithoutEcbButton.onClick.AddListener( () => SetUpdate( BounceCountSystem.UpdateType.WithoutEcb ) );
-            updateWithTempEcbButton.onClick.AddListener( () => SetUpdate( BounceCountSystem.UpdateType.WithTempEcb ) );
+            updateWithoutEcbButton.onClick.AddListener( () => SetUpdate( BounceCountSystem.UpdateType.NowWithEntityManager ) );
+            updateWithTempEcbButton.onClick.AddListener( () => SetUpdate( BounceCountSystem.UpdateType.NowWithEcb ) );
             updateWithExternalEcbButton.onClick.AddListener( () =>
                 SetUpdate( BounceCountSystem.UpdateType.WithExternalEcb ) );
             UpdateEventSystems();
-            SetUpdate( BounceCountSystem.UpdateType.WithTempEcb );
+            SetUpdate( BounceCountSystem.UpdateType.NowWithEcb );
+        }
+
+        private void Update()
+        {
+            if ( everyFrameSpawn.isOn ) {
+                var amount = int.Parse( everyFrameSpawnAmountField.text );
+                SpawnBalls( amount );
+            }
+        }
+
+        private void DestroyAllBalls()
+        {
+            var em    = World.DefaultGameObjectInjectionWorld.EntityManager;
+            var query = em.CreateEntityQuery( typeof(Ball) );
+            var balls = query.ToEntityArray( Allocator.Temp );
+            em.DestroyEntity( balls );
+            balls.Dispose();
         }
 
         private void SetUpdate( BounceCountSystem.UpdateType type )
         {
             switch ( type ) {
-                case BounceCountSystem.UpdateType.WithoutEcb:
+                case BounceCountSystem.UpdateType.NowWithEntityManager:
                     updateWithoutEcbButton.GetComponent<Image>().color      = Color.green;
                     updateWithTempEcbButton.GetComponent<Image>().color     = Color.white;
                     updateWithExternalEcbButton.GetComponent<Image>().color = Color.white;
                     break;
-                case BounceCountSystem.UpdateType.WithTempEcb:
+                case BounceCountSystem.UpdateType.NowWithEcb:
                     updateWithoutEcbButton.GetComponent<Image>().color      = Color.white;
                     updateWithTempEcbButton.GetComponent<Image>().color     = Color.green;
                     updateWithExternalEcbButton.GetComponent<Image>().color = Color.white;
@@ -74,12 +96,11 @@ namespace ReactiveDotsSample
 
         private void SpawnBalls( int amount )
         {
-            // TODO: do spawning ECS way but randomize direction and speed like
-            // World.DefaultGameObjectInjectionWorld.EntityManager
-            //     .Instantiate( _ballEntityPrefab, amount, Allocator.Temp )
-            //     .Dispose();
-            for ( int i = 0; i < amount; i++ )
-                GameObject.Instantiate( ballsPrefab );
+            World.DefaultGameObjectInjectionWorld.EntityManager
+                .Instantiate( _ballEntityPrefab, amount, Allocator.Temp )
+                .Dispose();
+            // for ( int i = 0; i < amount; i++ )
+            //     GameObject.Instantiate( ballsPrefab );
         }
 
         public void DeclareReferencedPrefabs( List<GameObject> referencedPrefabs )
