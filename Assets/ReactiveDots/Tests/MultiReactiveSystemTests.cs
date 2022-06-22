@@ -177,7 +177,7 @@ namespace ReactiveDots.Tests
 
         protected override void OnUpdate()
         {
-            Dependency = this.UpdateReactive( Dependency );
+            Dependency = this.UpdateReactiveNowWithEcb( Dependency );
             Dependency.Complete();
         }
     }
