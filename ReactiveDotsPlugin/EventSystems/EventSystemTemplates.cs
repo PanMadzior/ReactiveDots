@@ -17,10 +17,10 @@ namespace $$namespace$$
 
         private Unity.Jobs.JobHandle UpdateReactive( Unity.Jobs.JobHandle dependency )
         {
-            foreach( var update in _reactiveAddedRemovedUpdates )
-                update( this );
             foreach( var update in _reactiveChangedUpdates )
                 dependency = update( this, dependency );
+            foreach( var update in _reactiveAddedRemovedUpdates )
+                update( this );
             return dependency;
         }
 
