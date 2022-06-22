@@ -18,19 +18,19 @@ namespace ReactiveDotsSample
         public void OnAnySpeedAdded( Entity entity, Speed component, World world )
         {
             Debug.Log(
-                $"New speed={component.Value} for entity with id={world.EntityManager.GetComponentData<Id>( entity ).Value}" );
+                $"New speed={component.Value} for entity with id={entity.Index}" );
         }
 
         public void OnAnySpeedChanged( Entity entity, Speed component, World world )
         {
             Debug.Log(
-                $"Updated speed={component.Value} for entity with id={world.EntityManager.GetComponentData<Id>( entity ).Value}" );
+                $"Updated speed={component.Value} for entity with id={entity.Index}" );
         }
 
         public void OnAnySpeedRemoved( Entity entity, World world )
         {
             Debug.Log(
-                $"Speed removed from entity with id={world.EntityManager.GetComponentData<Id>( entity ).Value}" );
+                $"Speed removed from entity with id={entity.Index}" );
         }
     }
 }

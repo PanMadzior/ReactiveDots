@@ -67,9 +67,9 @@
      <Compile Include="Assets\ReactiveDots\Scripts\Utils\InitWithAttribute.cs" />
      <Compile Include="Assets\ReactiveDots\Scripts\Events\ReactiveEventSystemAttribute.cs" />
      <Compile Include="Assets\ReactiveDots\Scripts\Events\DefaultEventSystem.cs" />
+     <Compile Include="Assets\ReactiveDots\Scripts\Events\ReactiveEventForAttribute.cs" />
      <Compile Include="Assets\ReactiveDots\Scripts\ReactiveSystems\ComponentReactiveData.cs" />
      <Compile Include="Assets\ReactiveDots\Scripts\Utils\BooleanSimplifier.cs" />
-     <Compile Include="Assets\ReactiveDots\Scripts\Events\ReactiveEventForAttribute.cs" />
      <None Include="Assets\ReactiveDots\Scripts\ReactiveDotsScriptsAssembly.asmdef" />
  <Reference Include="UnityEngine">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.3.31f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

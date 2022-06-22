@@ -61,12 +61,14 @@
     <Analyzer Include="Packages/com.unity.entities/Unity.Entities/SourceGenerators/Unity.Entities.SourceGen.AuthoringComponent.dll" />
   </ItemGroup>
 <ItemGroup>
+     <Compile Include="Assets\ReactiveDots\Tests\MultiReactiveSystemTests.cs" />
+     <Compile Include="Assets\ReactiveDots\Tests\CrossAssembliesReactiveSystemTests.cs" />
      <Compile Include="Assets\ReactiveDots\Tests\TestBase.cs" />
      <Compile Include="Assets\ReactiveDots\Tests\BasicEventSystemTests.cs" />
+     <Compile Include="Assets\ReactiveDots\Tests\BasicReactiveSystemWithExternalEcbTests.cs" />
      <Compile Include="Assets\ReactiveDots\Tests\BasicReactiveSystemTests.cs" />
-     <Compile Include="Assets\ReactiveDots\Tests\CrossAssembliesReactiveSystemTests.cs" />
+     <Compile Include="Assets\ReactiveDots\Tests\BasicReactiveSystemWithEntityManagerTests.cs" />
      <Compile Include="Assets\ReactiveDots\Tests\ForComponentEventSystemTests.cs" />
-     <Compile Include="Assets\ReactiveDots\Tests\MultiReactiveSystemTests.cs" />
      <None Include="Assets\ReactiveDots\Tests\ReactiveDots.Tests.asmdef" />
  <Reference Include="UnityEngine">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.3.31f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

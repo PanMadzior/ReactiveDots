@@ -4,22 +4,22 @@ using Unity.Jobs;
 
 namespace ReactiveDots.Tests
 {
-    public class BasicReactiveSystemTests : TestBase
+    public class BasicReactiveSystemWithEntityManagerTests : TestBase
     {
-        private TestReactiveSystem _testReactive;
+        private TestReactiveWithEntityManagerSystem _testReactive;
 
         protected override void OnSetup()
         {
-            _testReactive = World.AddSystem( new TestReactiveSystem() );
+            _testReactive = World.AddSystem( new TestReactiveWithEntityManagerSystem() );
         }
 
         [Test]
         public void HasReactiveComponent()
         {
             var entity = EntityManager.CreateEntity();
-            EntityManager.AddComponentData( entity, new TestComponent() { Value = 0 } );
+            EntityManager.AddComponentData( entity, new TestWithEntityManagerComponent() { Value = 0 } );
             _testReactive.Update();
-            Assert.True( EntityManager.HasComponent<TestReactiveSystem.TestComponentReactive>( entity ),
+            Assert.True( EntityManager.HasComponent<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ),
                 "Entity should have a TestSystem.TestComponentReactive but has not." );
         }
 
@@ -27,15 +27,15 @@ namespace ReactiveDots.Tests
         public void IsAdded()
         {
             var entity = EntityManager.CreateEntity();
-            EntityManager.AddComponentData( entity, new TestComponent() { Value = 0 } );
+            EntityManager.AddComponentData( entity, new TestWithEntityManagerComponent() { Value = 0 } );
             _testReactive.Update();
 
-            var reactiveData = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity ).Value;
+            var reactiveData = EntityManager.GetComponentData<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ).Value;
             Assert.True( reactiveData.Added,
                 "Reactive data .Added should be true in first update, but it is false!" );
 
             _testReactive.Update();
-            reactiveData = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity ).Value;
+            reactiveData = EntityManager.GetComponentData<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ).Value;
             Assert.False( reactiveData.Added,
                 "Reactive data .Added should be false in second update, but it is true!" );
         }
@@ -44,21 +44,21 @@ namespace ReactiveDots.Tests
         public void IsChanged()
         {
             var entity = EntityManager.CreateEntity();
-            EntityManager.AddComponentData( entity, new TestComponent() { Value = 0 } );
+            EntityManager.AddComponentData( entity, new TestWithEntityManagerComponent() { Value = 0 } );
             
             _testReactive.Update();
-            var reactiveData1 = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity ).Value;
+            var reactiveData1 = EntityManager.GetComponentData<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ).Value;
             Assert.False( reactiveData1.Changed,
                 "Reactive data .Changed should be false in first update, but it is true!" );
 
             _testReactive.Update();
-            var reactiveData2 = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity ).Value;
+            var reactiveData2 = EntityManager.GetComponentData<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ).Value;
             Assert.False( reactiveData2.Changed,
                 "Reactive data .Changed should be false in second update, but it is true!" );
 
-            EntityManager.SetComponentData( entity, new TestComponent() { Value = 1 } );
+            EntityManager.SetComponentData( entity, new TestWithEntityManagerComponent() { Value = 1 } );
             _testReactive.Update();
-            var reactiveData3 = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity ).Value;
+            var reactiveData3 = EntityManager.GetComponentData<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ).Value;
             Assert.True( reactiveData3.Changed,
                 "Reactive data .Changed should be true after change, but it is false!" );
             Assert.True( reactiveData3.PreviousValue.Value == 1,
@@ -69,21 +69,21 @@ namespace ReactiveDots.Tests
         public void IsRemovedOnComponentRemoval()
         {
             var entity = EntityManager.CreateEntity();
-            EntityManager.AddComponentData( entity, new TestComponent() { Value = 0 } );
+            EntityManager.AddComponentData( entity, new TestWithEntityManagerComponent() { Value = 0 } );
             _testReactive.Update();
 
-            var reactiveData1 = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity ).Value;
+            var reactiveData1 = EntityManager.GetComponentData<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ).Value;
             Assert.False( reactiveData1.Removed,
                 "Reactive data .Removed should be false in first update, but it is true!" );
 
-            EntityManager.RemoveComponent<TestComponent>( entity );
+            EntityManager.RemoveComponent<TestWithEntityManagerComponent>( entity );
             _testReactive.Update();
-            var reactiveData2 = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity ).Value;
+            var reactiveData2 = EntityManager.GetComponentData<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ).Value;
             Assert.True( reactiveData2.Removed,
                 "Reactive data .Added should be true after main component removal, but it is false!" );
 
             _testReactive.Update();
-            Assert.False( EntityManager.HasComponent<TestReactiveSystem.TestComponentReactive>( entity ),
+            Assert.False( EntityManager.HasComponent<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ),
                 "Reactive data should not be present in the second frame after main component removal, but it is!" );
         }
 
@@ -91,50 +91,50 @@ namespace ReactiveDots.Tests
         public void IsRemovedOnEntityDestroy()
         {
             var entity = EntityManager.CreateEntity();
-            EntityManager.AddComponentData( entity, new TestComponent() { Value = 0 } );
+            EntityManager.AddComponentData( entity, new TestWithEntityManagerComponent() { Value = 0 } );
             _testReactive.Update();
 
-            var reactiveData1 = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity ).Value;
+            var reactiveData1 = EntityManager.GetComponentData<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ).Value;
             Assert.False( reactiveData1.Removed,
                 "Reactive data .Removed should be false in first update, but it is true!" );
 
             EntityManager.DestroyEntity( entity );
             _testReactive.Update();
-            var reactiveData2 = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity ).Value;
+            var reactiveData2 = EntityManager.GetComponentData<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ).Value;
             Assert.True( reactiveData2.Removed,
                 "Reactive data .Added should be true after entity destroy, but it is false!" );
 
             _testReactive.Update();
-            Assert.False( EntityManager.HasComponent<TestReactiveSystem.TestComponentReactive>( entity ),
+            Assert.False( EntityManager.HasComponent<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ),
                 "Reactive data should not be present in the second frame after entity destroy, but it is!" );
         }
     }
 
-    public struct TestComponent : IComponentData
+    public struct TestWithEntityManagerComponent : IComponentData
     {
         public int Value;
     }
 
     [DisableAutoCreation]
-    [ReactiveSystem( typeof(TestComponent), typeof(TestComponentReactive) )]
-    public partial class TestReactiveSystem : SystemBase
+    [ReactiveSystem( typeof(TestWithEntityManagerComponent), typeof(TestComponentReactive) )]
+    public partial class TestReactiveWithEntityManagerSystem : SystemBase
     {
         public struct TestComponentReactive : ISystemStateComponentData
         {
-            public ComponentReactiveData<TestComponent> Value;
+            public ComponentReactiveData<TestWithEntityManagerComponent> Value;
         }
 
         protected override void OnCreate()
         {
             base.OnCreate();
             GetEntityQuery(
-                ComponentType.Exclude<ReactiveDots.Tests.TestComponent>(),
-                ComponentType.ReadWrite<ReactiveDots.Tests.TestReactiveSystem.TestComponentReactive>() );
+                ComponentType.Exclude<TestWithEntityManagerComponent>(),
+                ComponentType.ReadWrite<TestComponentReactive>() );
         }
 
         protected override void OnUpdate()
         {
-            Dependency = this.UpdateReactiveNowWithEcb( Dependency );
+            Dependency = this.UpdateReactiveNowWithEntityManager( Dependency );
             Dependency.Complete();
         }
     }
