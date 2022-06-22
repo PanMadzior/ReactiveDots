@@ -260,18 +260,32 @@ namespace $$namespace$$
 {
     public static class $$systemName$$_Reactive
     {
+        /// <summary>
+        /// Updates reactive components on the main thread with EntityManager.
+        /// This method is NOT recommended as it makes a sync point.
+        /// </summary>
         public static Unity.Jobs.JobHandle UpdateReactiveNowWithEntityManager( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
         { $$placeForUpdatesChanged$$ $$placeForUpdatesAddedRemoved_WithoutEcb$$
             return dependency;
         }
 
+        /// <summary>
+        /// Updates reactive components in parallel jobs with a temporary EntityCommandBuffer.
+        /// This method is NOT recommended as it makes a sync point.
+        /// </summary>
         public static Unity.Jobs.JobHandle UpdateReactiveNowWithEcb( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
         { $$placeForUpdatesChanged$$ $$placeForUpdatesAddedRemoved_WithTempEcb$$
             return dependency;
         }
 
+        /// <summary>
+        /// Updates reactive components in parallel jobs with EntityCommandBuffer from EndSimulationEntityCommandBufferSystem.
+        /// Note that .Added and .Removed will not be updated until an ECB playback and will be available with one frame delay.
+        /// If you need to know if component was added without a one frame delay, use Entities.WithNone{ReactiveComp}.
+        /// If you need to know if component was removed without a one frame delay, use Entities.WithNone{Comp}.WithAll{ReactiveComp}.
+        /// </summary>
         public static Unity.Jobs.JobHandle UpdateReactive( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
         {
@@ -280,6 +294,12 @@ namespace $$namespace$$
             return UpdateReactive( sys, dependency, defaultEcb );
         }
 
+        /// <summary>
+        /// Updates reactive components in parallel jobs with EntityCommandBuffer from a passed EntityCommandBufferSystem.
+        /// Note that .Added and .Removed will not be updated until an ECB playback and will be available with one frame delay.
+        /// If you need to know if component was added without a one frame delay, use Entities.WithNone{ReactiveComp}.
+        /// If you need to know if component was removed without a one frame delay, use Entities.WithNone{Comp}.WithAll{ReactiveComp}.
+        /// </summary>
         public static Unity.Jobs.JobHandle UpdateReactive( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency, EntityCommandBufferSystem ecbSystem )
         {
@@ -290,6 +310,12 @@ namespace $$namespace$$
             return dependency;
         }
 
+        /// <summary>
+        /// Updates reactive components in parallel jobs with passed EntityCommandBuffers.
+        /// Note that .Added and .Removed will not be updated until an ECB playback and might be available with one frame delay.
+        /// If you need to know if component was added without a one frame delay, use Entities.WithNone{ReactiveComp}.
+        /// If you need to know if component was removed without a one frame delay, use Entities.WithNone{Comp}.WithAll{ReactiveComp}.
+        /// </summary>
         public static Unity.Jobs.JobHandle UpdateReactive( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency, EntityCommandBuffer ecbForAdded, EntityCommandBuffer ecbForRemoved )
         {
