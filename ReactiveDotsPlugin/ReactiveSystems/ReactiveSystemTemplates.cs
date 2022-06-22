@@ -60,8 +60,7 @@
                         PreviousValue        = sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ),
                         Added                = true,
                         Changed              = false,
-                        Removed              = false,
-                        _FirstCheckCompleted = false
+                        Removed              = false
                     }
                 } );
             }
@@ -137,8 +136,7 @@
                         PreviousValue        = comp,
                         Added                = true,
                         Changed              = false,
-                        Removed              = false,
-                        _FirstCheckCompleted = false
+                        Removed              = false
                     }
                 };
                 ecb.AddComponent( indexOfFirstEntityInQuery, entity, rComp );
@@ -244,10 +242,9 @@
             {
                 rComp.Value = new ComponentReactiveData<$$componentNameFull$$>() {
                     PreviousValue        = comp,
-                    Added                = !rComp.Value._FirstCheckCompleted,
+                    Added                = false,
                     Changed              = BooleanSimplifier.Any( comp.$$variableNameToCompare$$ != rComp.Value.PreviousValue.$$variableNameToCompare$$ ),
-                    Removed              = rComp.Value.Removed,
-                    _FirstCheckCompleted = true
+                    Removed              = rComp.Value.Removed
                 };
             }
         }
@@ -265,13 +262,13 @@ namespace $$namespace$$
     {
         public static Unity.Jobs.JobHandle UpdateReactiveNowWithEntityManager( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
-        { $$placeForUpdatesAddedRemoved_WithoutEcb$$ $$placeForUpdatesChanged$$
+        { $$placeForUpdatesChanged$$ $$placeForUpdatesAddedRemoved_WithoutEcb$$
             return dependency;
         }
 
         public static Unity.Jobs.JobHandle UpdateReactiveNowWithEcb( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
-        { $$placeForUpdatesAddedRemoved_WithTempEcb$$ $$placeForUpdatesChanged$$
+        { $$placeForUpdatesChanged$$ $$placeForUpdatesAddedRemoved_WithTempEcb$$
             return dependency;
         }
 
@@ -296,10 +293,10 @@ namespace $$namespace$$
         public static Unity.Jobs.JobHandle UpdateReactive( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency, EntityCommandBuffer ecbForAdded, EntityCommandBuffer ecbForRemoved )
         {
-            var ecbWriterForAdded = ecbForAdded.AsParallelWriter();
-            var ecbWriterForRemoved = ecbForAdded.AsParallelWriter();
-$$placeForUpdatesAddedRemoved_WithExternalEcb$$
 $$placeForUpdatesChanged$$
+            var ecbWriterForAdded = ecbForAdded.AsParallelWriter();
+            var ecbWriterForRemoved = ecbForRemoved.AsParallelWriter();
+$$placeForUpdatesAddedRemoved_WithExternalEcb$$
             return dependency;
         }
     }

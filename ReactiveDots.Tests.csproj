@@ -65,7 +65,9 @@
      <Compile Include="Assets\ReactiveDots\Tests\CrossAssembliesReactiveSystemTests.cs" />
      <Compile Include="Assets\ReactiveDots\Tests\TestBase.cs" />
      <Compile Include="Assets\ReactiveDots\Tests\BasicEventSystemTests.cs" />
+     <Compile Include="Assets\ReactiveDots\Tests\BasicReactiveSystemWithExternalEcbTests.cs" />
      <Compile Include="Assets\ReactiveDots\Tests\BasicReactiveSystemTests.cs" />
+     <Compile Include="Assets\ReactiveDots\Tests\BasicReactiveSystemWithEntityManagerTests.cs" />
      <Compile Include="Assets\ReactiveDots\Tests\ForComponentEventSystemTests.cs" />
      <None Include="Assets\ReactiveDots\Tests\ReactiveDots.Tests.asmdef" />
  <Reference Include="UnityEngine">
