@@ -7,7 +7,7 @@ namespace ReactiveDotsSample
     {
         public void Convert( Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem )
         {
-            dstManager.AddComponents( entity, new ComponentTypes(
+            dstManager.AddComponents( entity, new ComponentTypeSet(
                 typeof(Ball),
                 typeof(MoveDirection),
                 typeof(Bounces),

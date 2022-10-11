@@ -7,7 +7,7 @@ namespace ReactiveDotsSample
     [ReactiveSystem( typeof(MoveDirection), typeof(MoveDirectionReactive) )]
     public partial class BounceCountSystem : SystemBase
     {
-        public struct MoveDirectionReactive : ISystemStateComponentData
+        public struct MoveDirectionReactive : ICleanupComponentData
         {
             public ComponentReactiveData<MoveDirection> Value;
         }
@@ -26,7 +26,7 @@ namespace ReactiveDotsSample
         protected override void OnCreate()
         {
             base.OnCreate();
-            _externalCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+            _externalCommandBufferSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
         }
 
         protected override void OnUpdate()

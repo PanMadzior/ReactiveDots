@@ -10,15 +10,15 @@ namespace ReactiveDotsSample
         {
             var arenaSize   = GetSingleton<ArenaSize>().Value;
             var arenaBounds = new float4( -arenaSize.x / 2f, -arenaSize.y / 2f, arenaSize.x / 2f, arenaSize.y / 2f );
-            var dt          = Time.DeltaTime;
+            var dt          = SystemAPI.Time.DeltaTime;
 
-            Entities.ForEach( ( ref MoveDirection direction, ref Translation translation, in Speed speed ) =>
+            Entities.ForEach( ( ref MoveDirection direction, ref LocalToWorldTransform transform, in Speed speed ) =>
             {
-                var pos       = translation.Value;
+                var pos       = transform.Value.Position;
                 var moveDelta = direction.Value * speed.Value * dt;
                 var newPos    = pos + moveDelta;
                 if ( IsInBounds( newPos, arenaBounds ) )
-                    translation.Value = newPos;
+                    transform.Value.Position = newPos;
                 else
                     direction.Value = GetNewDirection( direction.Value, newPos, arenaBounds );
             } ).ScheduleParallel();

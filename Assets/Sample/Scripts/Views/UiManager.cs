@@ -36,7 +36,8 @@ namespace ReactiveDotsSample
             spawnBalls100000Button.onClick.AddListener( () => SpawnBalls( 100000 ) );
             spawnBalls1000000Button.onClick.AddListener( () => SpawnBalls( 1000000 ) );
             eventSystemsToggle.onValueChanged.AddListener( ( _ ) => UpdateEventSystems() );
-            updateWithoutEcbButton.onClick.AddListener( () => SetUpdate( BounceCountSystem.UpdateType.NowWithEntityManager ) );
+            updateWithoutEcbButton.onClick.AddListener( () =>
+                SetUpdate( BounceCountSystem.UpdateType.NowWithEntityManager ) );
             updateWithTempEcbButton.onClick.AddListener( () => SetUpdate( BounceCountSystem.UpdateType.NowWithEcb ) );
             updateWithExternalEcbButton.onClick.AddListener( () =>
                 SetUpdate( BounceCountSystem.UpdateType.WithExternalEcb ) );
@@ -81,14 +82,14 @@ namespace ReactiveDotsSample
                     break;
             }
 
-            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<BounceCountSystem>().updateType = type;
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<BounceCountSystem>().updateType = type;
         }
 
         private void UpdateEventSystems()
         {
             var enabled = eventSystemsToggle.isOn;
-            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<DefaultEventSystem>().Enabled = enabled;
-            World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<CustomEventSystem>().Enabled  = enabled;
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<DefaultEventSystem>().Enabled = enabled;
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<CustomEventSystem>().Enabled  = enabled;
             eventSystemInfo.text = enabled
                 ? "Event systems are now enabled. Disable them if you are testing a large number of entities."
                 : "Event systems are now disabled. Keep them disable if you are testing a large number of entities.";

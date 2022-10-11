@@ -16,7 +16,7 @@ namespace ReactiveDots.Tests
 
         protected override void OnSetup()
         {
-            _defaultEventSystem = World.AddSystem( new DefaultEventSystem() );
+            _defaultEventSystem = World.AddSystemManaged( new DefaultEventSystem() );
         }
 
         [Test]

@@ -23,7 +23,7 @@ namespace ReactiveDots.Tests
         {
             if ( World != null && World.IsCreated ) {
                 while ( World.Systems.Count > 0 )
-                    World.DestroySystem( World.Systems[0] );
+                    World.DestroySystem( World.Systems[0].SystemHandle );
                 World.Dispose();
             }
 

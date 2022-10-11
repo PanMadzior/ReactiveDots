@@ -10,7 +10,7 @@ namespace ReactiveDots.Tests
 
         protected override void OnSetup()
         {
-            _testReactive = World.AddSystem( new TestReactiveSystem() );
+            _testReactive = World.AddSystemManaged( new TestReactiveSystem() );
         }
 
         [Test]
@@ -119,7 +119,7 @@ namespace ReactiveDots.Tests
     [ReactiveSystem( typeof(TestComponent), typeof(TestComponentReactive) )]
     public partial class TestReactiveSystem : SystemBase
     {
-        public struct TestComponentReactive : ISystemStateComponentData
+        public struct TestComponentReactive : ICleanupComponentData
         {
             public ComponentReactiveData<TestComponent> Value;
         }

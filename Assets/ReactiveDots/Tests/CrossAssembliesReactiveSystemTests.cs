@@ -10,7 +10,7 @@ namespace ReactiveDots.Tests
 
         protected override void OnSetup()
         {
-            _testReactive = World.AddSystem( new CrossAssembliesTestReactiveSystem() );
+            _testReactive = World.AddSystemManaged( new CrossAssembliesTestReactiveSystem() );
         }
 
         [Test]
@@ -123,7 +123,7 @@ namespace ReactiveDots.Tests
     [ReactiveSystem( typeof(OtherAssemblyTestComponent), typeof(TestComponentReactive) )]
     public partial class CrossAssembliesTestReactiveSystem : SystemBase
     {
-        public struct TestComponentReactive : ISystemStateComponentData
+        public struct TestComponentReactive : ICleanupComponentData
         {
             public ComponentReactiveData<OtherAssemblyTestComponent> Value;
         }

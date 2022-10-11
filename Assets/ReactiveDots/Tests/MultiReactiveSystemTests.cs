@@ -9,7 +9,7 @@ namespace ReactiveDots.Tests
 
         protected override void OnSetup()
         {
-            _testReactive = World.AddSystem( new TestMultiReactiveSystem() );
+            _testReactive = World.AddSystemManaged( new TestMultiReactiveSystem() );
         }
 
         [Test]
@@ -165,12 +165,12 @@ namespace ReactiveDots.Tests
     [ReactiveSystem( typeof(CompB), typeof(CompBReactive) )]
     public partial class TestMultiReactiveSystem : SystemBase
     {
-        public struct CompAReactive : ISystemStateComponentData
+        public struct CompAReactive : ICleanupComponentData
         {
             public ComponentReactiveData<CompA> Value;
         }
         
-        public struct CompBReactive : ISystemStateComponentData
+        public struct CompBReactive : ICleanupComponentData
         {
             public ComponentReactiveData<CompB> Value;
         }

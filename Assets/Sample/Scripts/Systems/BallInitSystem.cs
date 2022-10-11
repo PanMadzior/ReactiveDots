@@ -8,7 +8,7 @@ namespace ReactiveDotsSample
     [ReactiveSystem( typeof(MoveDirection), typeof(MoveDirectionReactive) )]
     public partial class BallInitSystem : SystemBase
     {
-        public struct MoveDirectionReactive : ISystemStateComponentData
+        public struct MoveDirectionReactive : ICleanupComponentData
         {
             public ComponentReactiveData<MoveDirection> Value;
         }

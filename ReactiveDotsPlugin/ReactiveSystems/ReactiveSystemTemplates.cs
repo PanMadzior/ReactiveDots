@@ -118,7 +118,7 @@
             {
                 var entities      = batchInChunk.GetNativeArray( entityHandle );
                 var compsArrayPtr =
-                    InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( batchInChunk, compHandle );
+                    InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( batchInChunk, ref compHandle );
                 for ( int i = 0; i < batchInChunk.Count; i++ ) {
                     Execute(
                         entities[i],
@@ -173,7 +173,7 @@
             {
                 var entities      = batchInChunk.GetNativeArray( entityHandle );
                 var rCompArrayPtr =
-                    InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr( batchInChunk, rCompHandle );
+                    InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr( batchInChunk, ref rCompHandle );
                 for ( int i = 0; i < batchInChunk.Count; i++ ) {
                     Execute(
                         entities[i],
@@ -224,9 +224,9 @@
             public void Execute( ArchetypeChunk batchInChunk, int batchIndex )
             {
                 var compsArrayPtr =
-                    InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( batchInChunk, compHandle );
+                    InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( batchInChunk, ref compHandle );
                 var rCompArrayPtr =
-                    InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr( batchInChunk, rCompHandle );
+                    InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr( batchInChunk, ref rCompHandle );
                 for ( int i = 0; i < batchInChunk.Count; i++ ) {
                     Execute(
                         ref InternalCompilerInterface
@@ -290,7 +290,7 @@ namespace $$namespace$$
             Unity.Jobs.JobHandle dependency )
         {
             // TODO: cache it maybe?
-            var defaultEcb = sys.World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+            var defaultEcb = sys.World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
             return UpdateReactive( sys, dependency, defaultEcb );
         }
 
@@ -379,7 +379,7 @@ $$placeForComponents$$
 
         public static string GetTemplateForReactiveComponent()
         {
-            return @"        public struct $$componentName$$Reactive : ISystemStateComponentData
+            return @"        public struct $$componentName$$Reactive : ICleanupComponentData
         {
             public ComponentReactiveData<$$componentNameFull$$> Value;
         }";

@@ -11,7 +11,7 @@ namespace ReactiveDots.Tests
 
         protected override void OnSetup()
         {
-            _testReactive = World.AddSystem( new TestReactiveWithExternalEcbSystem() );
+            _testReactive = World.AddSystemManaged( new TestReactiveWithExternalEcbSystem() );
         }
 
         [Test]
@@ -129,7 +129,7 @@ namespace ReactiveDots.Tests
     [ReactiveSystem( typeof(TestWithExternalEcbComponent), typeof(TestComponentReactive) )]
     public partial class TestReactiveWithExternalEcbSystem : SystemBase
     {
-        public struct TestComponentReactive : ISystemStateComponentData
+        public struct TestComponentReactive : ICleanupComponentData
         {
             public ComponentReactiveData<TestWithExternalEcbComponent> Value;
         }
