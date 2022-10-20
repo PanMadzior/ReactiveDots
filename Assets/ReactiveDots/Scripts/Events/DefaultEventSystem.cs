@@ -6,7 +6,6 @@ namespace ReactiveDots
     /// System which handles event changes by default.
     /// </summary>
     [UpdateInGroup( typeof(LateSimulationSystemGroup) )]
-    [AlwaysUpdateSystem]
     [ReactiveEventSystem]
     public partial class DefaultEventSystem : SystemBase
     {

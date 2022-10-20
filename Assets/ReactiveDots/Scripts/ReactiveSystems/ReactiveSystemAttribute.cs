@@ -4,7 +4,7 @@ using Unity.Entities;
 namespace ReactiveDots
 {
     [AttributeUsage( AttributeTargets.Class, AllowMultiple = true )]
-    public class ReactiveSystemAttribute : AlwaysUpdateSystemAttribute
+    public class ReactiveSystemAttribute : Attribute
     {
         public Type ComponentType;
         public Type RComponentType;

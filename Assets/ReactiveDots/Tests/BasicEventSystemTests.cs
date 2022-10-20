@@ -79,7 +79,7 @@ namespace ReactiveDots.Tests
             _defaultEventSystem.Update();
             Assert.True( _anyRemovedInvoked, "Any removed event should have fired, but didn't!" );
             _anyRemovedInvoked = false;
-            
+
             _defaultEventSystem.Update();
             Assert.False( _anyRemovedInvoked,
                 "Any removed event should have not fired in the second frame after component removal, but did!" );
@@ -105,7 +105,7 @@ namespace ReactiveDots.Tests
             _defaultEventSystem.Update();
             Assert.True( _anyRemovedInvoked, "Any removed event should have fired, but didn't!" );
             _anyRemovedInvoked = false;
-            
+
             _defaultEventSystem.Update();
             Assert.False( _anyRemovedInvoked,
                 "Any removed event should have not fired in the second frame after entity destroy, but did!" );
@@ -114,6 +114,23 @@ namespace ReactiveDots.Tests
         public void OnAnyEventComponentRemoved( Entity entity, World world )
         {
             _anyRemovedInvoked = true;
+        }        
+        
+        [Test]
+        public void MultipleEntities()
+        {
+            var entity = EntityManager.CreateEntity();
+            EntityManager.AddComponentData( entity, new EventComponent() { Value = 0 } );
+            var listener = EntityManager.CreateEntity();
+            EntityManager.AddComponentData( listener, new AnyEventComponentChangedListener() { Value = this } );
+            _defaultEventSystem.Update();
+            
+            Assert.DoesNotThrow( () =>
+            {
+                var entity2 = EntityManager.CreateEntity();
+                EntityManager.AddComponentData( entity2, new EventComponent() { Value = 0 } );
+                _defaultEventSystem.Update();
+            }, "Exception caught when adding second entity with event component." );
         }
     }
 

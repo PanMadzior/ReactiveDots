@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ReactiveDots;
 using Unity.Collections;
 using Unity.Entities;
@@ -8,9 +7,8 @@ using UnityEngine.UI;
 
 namespace ReactiveDotsSample
 {
-    public class UiManager : MonoBehaviour, IDeclareReferencedPrefabs, IConvertGameObjectToEntity
+    public class UiManager : MonoBehaviour
     {
-        public GameObject ballsPrefab;
         public Button     destroyAllBalls;
         public Button     spawnBallButton;
         public Button     spawnBalls100Button;
@@ -24,8 +22,6 @@ namespace ReactiveDotsSample
         public Button     updateWithoutEcbButton;
         public Button     updateWithTempEcbButton;
         public Button     updateWithExternalEcbButton;
-
-        private Entity _ballEntityPrefab;
 
         private void Awake()
         {
@@ -97,21 +93,11 @@ namespace ReactiveDotsSample
 
         private void SpawnBalls( int amount )
         {
+            var prefab = World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<BounceCountSystem>()
+                .GetSingleton<Arena>().BallPrefab;
             World.DefaultGameObjectInjectionWorld.EntityManager
-                .Instantiate( _ballEntityPrefab, amount, Allocator.Temp )
+                .Instantiate( prefab, amount, Allocator.Temp )
                 .Dispose();
-            // for ( int i = 0; i < amount; i++ )
-            //     GameObject.Instantiate( ballsPrefab );
-        }
-
-        public void DeclareReferencedPrefabs( List<GameObject> referencedPrefabs )
-        {
-            referencedPrefabs.Add( ballsPrefab );
-        }
-
-        public void Convert( Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem )
-        {
-            _ballEntityPrefab = conversionSystem.GetPrimaryEntity( ballsPrefab );
         }
     }
 }

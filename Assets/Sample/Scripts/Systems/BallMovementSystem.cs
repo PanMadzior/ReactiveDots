@@ -8,7 +8,7 @@ namespace ReactiveDotsSample
     {
         protected override void OnUpdate()
         {
-            var arenaSize   = GetSingleton<ArenaSize>().Value;
+            var arenaSize   = GetSingleton<Arena>().Size;
             var arenaBounds = new float4( -arenaSize.x / 2f, -arenaSize.y / 2f, arenaSize.x / 2f, arenaSize.y / 2f );
             var dt          = SystemAPI.Time.DeltaTime;
 

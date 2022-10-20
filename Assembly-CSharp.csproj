@@ -60,12 +60,13 @@
      <Compile Include="Assets\Sample\Scripts\Authoring\BallAuthoring.cs" />
      <Compile Include="Assets\Sample\Scripts\Components\Speed.cs" />
      <Compile Include="Assets\Sample\Scripts\Listeners\BouncesListener.cs" />
+     <Compile Include="Assets\Sample\Scripts\Components\Arena.cs" />
      <Compile Include="Assets\Sample\Scripts\Components\Bounces.cs" />
      <Compile Include="Assets\Sample\Scripts\Components\MoveDirection.cs" />
      <Compile Include="Assets\Sample\Scripts\Listeners\SpeedListener.cs" />
-     <Compile Include="Assets\Sample\Scripts\Components\ArenaSize.cs" />
      <Compile Include="Assets\Sample\Scripts\Systems\BounceCountSystem.cs" />
      <Compile Include="Assets\Sample\Scripts\Components\Ball.cs" />
+     <Compile Include="Assets\Sample\Scripts\Authoring\ArenaAuthoring.cs" />
      <Compile Include="Assets\Sample\Scripts\Views\UiManager.cs" />
      <Compile Include="Assets\Sample\Scripts\Systems\CustomEventSystem.cs" />
      <Reference Include="UnityEngine">

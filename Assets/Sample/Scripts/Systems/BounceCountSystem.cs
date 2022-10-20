@@ -31,6 +31,10 @@ namespace ReactiveDotsSample
 
         protected override void OnUpdate()
         {
+            // var instanceData = BounceCountSystem_MoveDirection_Reactive.GetOrCreateInstanceData( this );
+            // instanceData.addedQuery.CalculateEntityCount();
+            // instanceData.addedQuery.IsEmpty
+            
             switch ( updateType ) {
                 case UpdateType.NowWithEntityManager:
                     Dependency = this.UpdateReactiveNowWithEntityManager( Dependency );
@@ -45,18 +49,6 @@ namespace ReactiveDotsSample
                     _externalCommandBufferSystem.AddJobHandleForProducer( Dependency );
                     break;
             }
-
-            // Entities.WithNone<MoveDirectionReactive>().ForEach( ( in MoveDirection moveDir ) =>
-            //     {
-            //         Debug.Log( $"WithNone<> frame {UnityEngine.Time.frameCount}" );
-            //     } )
-            //     .Run();
-            //
-            // Entities.ForEach( ( in MoveDirectionReactive moveDirReactive ) =>
-            // {
-            //     if ( moveDirReactive.Value.Added )
-            //         Debug.Log( $".Added frame {UnityEngine.Time.frameCount}" );
-            // } ).Run();
 
             Entities.ForEach( ( ref Bounces bounces, in MoveDirectionReactive moveDirReactive ) =>
             {

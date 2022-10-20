@@ -43,14 +43,17 @@
             return data;
         }
 
-        public static void UpdateReactiveAddedRemoved( $$systemNameFull$$ sys )
+        public static Unity.Jobs.JobHandle UpdateReactiveAddedRemoved( $$systemNameFull$$ sys, 
+            Unity.Jobs.JobHandle dependency )
         {
             var instanceData = GetOrCreateInstanceData( sys );
+            if( !instanceData.addedQuery.IsEmpty || !instanceData.removedQuery.IsEmpty )
+                dependency.Complete();
             UpdateAdded( sys, instanceData );
             UpdateRemoved( sys, instanceData );
+            return dependency;
         }
 
-        // TODO: change to job?
         private static void UpdateAdded( $$systemNameFull$$ sys, InstanceData instanceData )
         {
             var addedEntities = instanceData.addedQuery.ToEntityArray( Allocator.Temp );
@@ -68,7 +71,6 @@
             addedEntities.Dispose();
         }
 
-        // TODO: change to job?
         private static void UpdateRemoved( $$systemNameFull$$ sys, InstanceData instanceData )
         {
             var removedEntities = instanceData.removedQuery.ToEntityArray( Allocator.Temp );
@@ -341,7 +343,7 @@ $$placeForComponents$$
 
         public static string GetTemplateForSystemUpdateAddedRemoved_WithoutEcb()
         {
-            return "            $$systemName$$_$$componentName$$_Reactive.UpdateReactiveAddedRemoved( sys );";
+            return "            dependency = $$systemName$$_$$componentName$$_Reactive.UpdateReactiveAddedRemoved( sys, dependency );";
         }
 
         public static string GetTemplateForSystemUpdateAddedRemoved_WithTempEcb()

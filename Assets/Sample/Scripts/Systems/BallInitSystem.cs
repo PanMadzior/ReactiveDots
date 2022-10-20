@@ -16,7 +16,7 @@ namespace ReactiveDotsSample
         protected override void OnUpdate()
         {
             Dependency = this.UpdateReactive( Dependency );
-            Entities.WithNone<MoveDirectionReactive>().ForEach(
+            Dependency = Entities.WithNone<MoveDirectionReactive>().ForEach(
                 ( Entity e, ref MoveDirection moveDir, ref Speed speed ) =>
                 {
                     var random      = Random.CreateFromIndex( (uint)e.Index );
@@ -24,7 +24,7 @@ namespace ReactiveDotsSample
                     var randomSpeed = random.NextFloat( 1f, 5f );
                     moveDir.Value = math.mul( quaternion.RotateY( randomRot ), new float3( 0f, 0f, 1f ) );
                     speed.Value   = randomSpeed;
-                } ).ScheduleParallel();
+                } ).ScheduleParallel( Dependency );
         }
     }
 }

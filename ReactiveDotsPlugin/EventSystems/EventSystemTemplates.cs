@@ -11,16 +11,18 @@ namespace $$namespace$$
 {    
     public partial class $$systemName$$
     {
-        private List<Action<$$systemName$$>> _reactiveAddedRemovedUpdates = new List<Action<$$systemName$$>>();
+        private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _reactiveAddedRemovedUpdates = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
         private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _reactiveChangedUpdates = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
         private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _eventFires = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
 
+        // TODO: refactor this to complete dependencies only if necessary
         private Unity.Jobs.JobHandle UpdateReactive( Unity.Jobs.JobHandle dependency )
         {
             foreach( var update in _reactiveChangedUpdates )
                 dependency = update( this, dependency );
+            dependency.Complete();
             foreach( var update in _reactiveAddedRemovedUpdates )
-                update( this );
+                dependency = update( this, dependency );
             return dependency;
         }
 
@@ -31,7 +33,8 @@ namespace $$namespace$$
             return dependency;
         }
 
-        public void RegisterEventComponent( Action<$$systemName$$> updateAddedRemoved, 
+        public void RegisterEventComponent( 
+            Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> updateAddedRemoved, 
             Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> updateChanged,
             Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> fireEvents )
         {

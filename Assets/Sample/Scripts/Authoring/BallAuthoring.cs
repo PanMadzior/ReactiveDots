@@ -3,16 +3,19 @@ using UnityEngine;
 
 namespace ReactiveDotsSample
 {
-    public class BallAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+    public class BallAuthoring : MonoBehaviour
     {
-        public void Convert( Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem )
+        public class Baker : Baker<BallAuthoring>
         {
-            dstManager.AddComponents( entity, new ComponentTypeSet(
-                typeof(Ball),
-                typeof(MoveDirection),
-                typeof(Bounces),
-                typeof(Speed) )
-            );
+            public override void Bake( BallAuthoring authoring )
+            {
+                AddComponent( new ComponentTypeSet(
+                    typeof(Ball),
+                    typeof(MoveDirection),
+                    typeof(Bounces),
+                    typeof(Speed) )
+                );
+            }
         }
     }
 }
