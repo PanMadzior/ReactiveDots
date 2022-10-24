@@ -22,6 +22,10 @@ namespace ReactiveDotsSample
         public Button     updateWithoutEcbButton;
         public Button     updateWithTempEcbButton;
         public Button     updateWithExternalEcbButton;
+        public Button     switchComponentStateButton;
+        public Text       switchComponentStateLabel;
+
+        private bool _currentComponentState = false;
 
         private void Awake()
         {
@@ -37,8 +41,22 @@ namespace ReactiveDotsSample
             updateWithTempEcbButton.onClick.AddListener( () => SetUpdate( BounceCountSystem.UpdateType.NowWithEcb ) );
             updateWithExternalEcbButton.onClick.AddListener( () =>
                 SetUpdate( BounceCountSystem.UpdateType.WithExternalEcb ) );
+            switchComponentStateButton.onClick.AddListener( SwitchComponentState );
+            SwitchComponentState();
             UpdateEventSystems();
             SetUpdate( BounceCountSystem.UpdateType.NowWithEcb );
+        }
+
+        private void SwitchComponentState()
+        {
+            _currentComponentState = !_currentComponentState;
+            switchComponentStateLabel.text =
+                _currentComponentState ? "Reactive component enabled" : "Reactive component disabled";
+            var requestEntity = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntity();
+            World.DefaultGameObjectInjectionWorld.EntityManager.AddComponentData(
+                requestEntity,
+                new ReactiveComponentStateChangeRequest() { newState = _currentComponentState }
+            );
         }
 
         private void Update()

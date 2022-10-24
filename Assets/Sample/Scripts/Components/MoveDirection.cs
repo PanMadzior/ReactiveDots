@@ -3,7 +3,7 @@ using Unity.Mathematics;
 
 namespace ReactiveDotsSample
 {
-    public struct MoveDirection : IComponentData
+    public struct MoveDirection : IComponentData, IEnableableComponent
     {
         public float3 Value;
     }

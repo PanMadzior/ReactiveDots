@@ -31,10 +31,6 @@ namespace ReactiveDotsSample
 
         protected override void OnUpdate()
         {
-            // var instanceData = BounceCountSystem_MoveDirection_Reactive.GetOrCreateInstanceData( this );
-            // instanceData.addedQuery.CalculateEntityCount();
-            // instanceData.addedQuery.IsEmpty
-            
             switch ( updateType ) {
                 case UpdateType.NowWithEntityManager:
                     Dependency = this.UpdateReactiveNowWithEntityManager( Dependency );
