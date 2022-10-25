@@ -60,6 +60,7 @@
      <Compile Include="Assets\ReactiveDots\Scripts\ReactiveSystems\ReactiveSystemAttribute.cs" />
      <Compile Include="Assets\ReactiveDots\Scripts\Events\DefaultEventSystem.cs" />
      <Compile Include="Assets\ReactiveDots\Scripts\Events\ReactiveEventAttribute.cs" />
+     <Compile Include="Assets\ReactiveDots\Scripts\ReactiveSystems\ReactiveEntityTag.cs" />
      <Compile Include="Assets\ReactiveDots\Scripts\Events\ReactiveEventSystemAttribute.cs" />
      <Compile Include="Assets\ReactiveDots\Scripts\Events\EventType.cs" />
      <Compile Include="Assets\ReactiveDots\Scripts\Utils\BooleanSimplifier.cs" />

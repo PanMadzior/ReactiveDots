@@ -12,19 +12,26 @@ namespace $$namespace$$
     public partial class $$systemName$$
     {
         private List<Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle>> _reactiveAddMissingReactiveDataMethods = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle>>();
+        private List<Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle>> _reactiveAddMissingReactiveTagMethods = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle>>();
+        private List<Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle>> _reactiveCleanupMethods = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle>>();
         private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _reactiveCoreChecks = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
         private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _reactiveRemovedChecks = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
         private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _eventFires = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
 
         private Unity.Jobs.JobHandle UpdateReactive( Unity.Jobs.JobHandle dependency, 
-            EntityCommandBuffer.ParallelWriter ecbForAdded )
+            EntityCommandBuffer.ParallelWriter ecbForAdded, EntityCommandBuffer.ParallelWriter ecbForMissingTag,
+            EntityCommandBuffer.ParallelWriter ecbForCleanup )
         {
             foreach( var update in _reactiveCoreChecks )
                 dependency = update( this, dependency );
-            foreach( var update in _reactiveRemovedChecks )
-                dependency = update( this, dependency );
             foreach( var update in _reactiveAddMissingReactiveDataMethods )
                 dependency = update( this, dependency, ecbForAdded );
+            foreach( var update in _reactiveAddMissingReactiveTagMethods )
+                dependency = update( this, dependency, ecbForMissingTag );
+            foreach( var update in _reactiveCleanupMethods )
+                dependency = update( this, dependency, ecbForCleanup );
+            foreach( var update in _reactiveRemovedChecks )
+                dependency = update( this, dependency );
             return dependency;
         }
 
@@ -37,11 +44,15 @@ namespace $$namespace$$
 
         public void RegisterEventComponent( 
             Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle> addMissingReactiveDataMethod, 
+            Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle> addMissingReactiveTagMethod, 
+            Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle> cleanupMethod, 
             Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> reactiveCoreCheck,
             Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> reactiveRemovedCheck,
             Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> fireEvents )
         {
             _reactiveAddMissingReactiveDataMethods.Add( addMissingReactiveDataMethod );
+            _reactiveAddMissingReactiveTagMethods.Add( addMissingReactiveTagMethod );
+            _reactiveCleanupMethods.Add( cleanupMethod );
             _reactiveCoreChecks.Add( reactiveCoreCheck );
             _reactiveRemovedChecks.Add( reactiveRemovedCheck );
             _eventFires.Add( fireEvents );            
@@ -157,6 +168,8 @@ $$placeForReactiveComponent$$
         {
             sys.RegisterEventComponent(
                 $$systemName$$_$$componentName$$_Reactive.AddMissingReactiveData,
+                $$systemName$$_$$componentName$$_Reactive.AddMissingReactiveEntityTag,
+                $$systemName$$_$$componentName$$_Reactive.CleanupDestroyedReactiveEntities,
                 $$systemName$$_$$componentName$$_Reactive.CheckForChangedOrAdded,
                 $$systemName$$_$$componentName$$_Reactive.CheckForRemoved,
                 $$systemName$$_$$componentName$$_ReactiveEvents.FireEvents

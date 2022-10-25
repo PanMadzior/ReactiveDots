@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Unity.Entities;
 using Unity.Jobs;
+using UnityEngine;
 
 namespace ReactiveDots.Tests
 {
@@ -120,7 +121,7 @@ namespace ReactiveDots.Tests
                 .GetComponentData<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ).Value;
             Assert.True( reactiveData2.Removed,
                 "Reactive data .Added should be true after entity destroy, but it is false!" );
-
+            
             _testReactive.Update();
             Assert.False(
                 EntityManager.HasComponent<TestReactiveWithEntityManagerSystem.TestComponentReactive>( entity ),

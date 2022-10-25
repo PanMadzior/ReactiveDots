@@ -150,11 +150,17 @@ namespace ReactiveDots.Tests
 
         protected override void OnUpdate()
         {
-            var ecbForAdded = new EntityCommandBuffer( Allocator.TempJob );
-            Dependency = this.UpdateReactive( Dependency, ecbForAdded );
+            var ecbForAdded      = new EntityCommandBuffer( Allocator.TempJob );
+            var ecbForMissingTag = new EntityCommandBuffer( Allocator.TempJob );
+            var ecbForCleanup    = new EntityCommandBuffer( Allocator.TempJob );
+            Dependency = this.UpdateReactive( Dependency, ecbForAdded, ecbForMissingTag, ecbForCleanup );
             Dependency.Complete();
             ecbForAdded.Playback( EntityManager );
             ecbForAdded.Dispose();
+            ecbForMissingTag.Playback( EntityManager );
+            ecbForMissingTag.Dispose();
+            ecbForCleanup.Playback( EntityManager );
+            ecbForCleanup.Dispose();
         }
     }
 }

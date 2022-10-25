@@ -32,6 +32,7 @@ namespace ReactiveDotsPlugin
             var globalTemplate = ReactiveSystemTemplates.GetGlobalTemplate();
             var usingsInsert = GeneratorUtils.GetUsingsInsert( context, reactiveSystem.ClassSyntax, GetCommonUsings() );
             var reactiveUpdatesChangedInsert = string.Empty;
+            var reactiveUpdatesRemovedInsert = string.Empty;
             var reactiveAddMissingReactiveDataInsert_WithoutEcb = string.Empty;
             var reactiveAddMissingReactiveDataInsert_WithTempEcb = string.Empty;
             var reactiveAddMissingReactiveDataInsert_WithExternalEcb = string.Empty;
@@ -49,7 +50,10 @@ namespace ReactiveDotsPlugin
                     ReactiveSystemTemplates.GetTemplateForSystemAddMissingReactiveData_WithExternalEcb(),
                     reactiveSystem, i );
                 reactiveUpdatesChangedInsert += "\n" + ReplaceKeywords(
-                    ReactiveSystemTemplates.GetTemplateForCoreReactiveChecks(),
+                    ReactiveSystemTemplates.GetTemplateForChangedOrAddedCheck(),
+                    reactiveSystem, i );
+                reactiveUpdatesRemovedInsert += "\n" + ReplaceKeywords(
+                    ReactiveSystemTemplates.GetTemplateForRemovedCheck(),
                     reactiveSystem, i );
                 reactiveComponentsInsert += "\n" + ReplaceKeywords( ReactiveSystemTemplates.GetTemplateForComponent(),
                     reactiveSystem, i );
@@ -65,6 +69,7 @@ namespace ReactiveDotsPlugin
                 .Replace( "$$placeForAddMissingReactiveData_WithExternalEcb$$",
                     reactiveAddMissingReactiveDataInsert_WithExternalEcb )
                 .Replace( "$$placeForUpdatesChanged$$", reactiveUpdatesChangedInsert )
+                .Replace( "$$placeForUpdatesRemoved$$", reactiveUpdatesRemovedInsert )
                 .Replace( "$$placeForComponents$$", reactiveComponentsInsert );
             context.AddSource( $"{reactiveSystem.SystemName}.Reactive.g.cs", SourceText.From( source, Encoding.UTF8 ) );
         }

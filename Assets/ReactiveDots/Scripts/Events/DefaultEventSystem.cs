@@ -18,12 +18,21 @@ namespace ReactiveDots
 
         protected override void OnUpdate()
         {
-            var ecb = new EntityCommandBuffer( Allocator.TempJob );
-            Dependency = UpdateReactive( Dependency, ecb.AsParallelWriter() );
+            var ecbForAdded      = new EntityCommandBuffer( Allocator.TempJob );
+            var ecbForMissingTag = new EntityCommandBuffer( Allocator.TempJob );
+            var ecbForCleanup    = new EntityCommandBuffer( Allocator.TempJob );
+            Dependency = UpdateReactive( Dependency, ecbForAdded.AsParallelWriter(),
+                ecbForMissingTag.AsParallelWriter(),
+                ecbForCleanup.AsParallelWriter()
+            );
             Dependency.Complete();
-            ecb.Playback( EntityManager );
-            ecb.Dispose();
+            ecbForAdded.Playback( EntityManager );
+            ecbForAdded.Dispose();
             Dependency = FireEvents( Dependency );
+            ecbForMissingTag.Playback( EntityManager );
+            ecbForMissingTag.Dispose();
+            ecbForCleanup.Playback( EntityManager );
+            ecbForCleanup.Dispose();
         }
     }
 }

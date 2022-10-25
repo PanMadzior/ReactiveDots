@@ -74,7 +74,7 @@ namespace ReactiveDots.Tests
             var entity = EntityManager.CreateEntity();
             EntityManager.AddComponentData( entity, new TestComponent() { Value = 0 } );
             _testReactive.Update();
-
+            
             var reactiveData1 = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity )
                 .Value;
             Assert.False( reactiveData1.Removed,
@@ -85,7 +85,7 @@ namespace ReactiveDots.Tests
             var reactiveData2 = EntityManager.GetComponentData<TestReactiveSystem.TestComponentReactive>( entity )
                 .Value;
             Assert.True( reactiveData2.Removed,
-                "Reactive data .Added should be true after main component removal, but it is false!" );
+                "Reactive data .Removed should be true after main component removal, but it is false!" );
 
             _testReactive.Update();
             Assert.True( EntityManager.HasComponent<TestReactiveSystem.TestComponentReactive>( entity ),
