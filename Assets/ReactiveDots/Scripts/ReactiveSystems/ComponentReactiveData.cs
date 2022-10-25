@@ -8,6 +8,7 @@ namespace ReactiveDots
         public bool Changed;
         public bool Added;
         public bool Removed;
+        public bool _AddedCheck;
 
         public bool AddedOrChanged => Added || Changed;
         public bool AddedOrRemoved => Added || Removed;

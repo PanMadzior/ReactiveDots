@@ -40,8 +40,7 @@ namespace ReactiveDotsSample
                     break;
                 case UpdateType.WithExternalEcb:
                     var ecbForAdded   = _externalCommandBufferSystem.CreateCommandBuffer();
-                    var ecbForRemoved = _externalCommandBufferSystem.CreateCommandBuffer();
-                    Dependency = this.UpdateReactive( Dependency, ecbForAdded, ecbForRemoved );
+                    Dependency = this.UpdateReactive( Dependency, ecbForAdded );
                     _externalCommandBufferSystem.AddJobHandleForProducer( Dependency );
                     break;
             }

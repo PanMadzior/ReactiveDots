@@ -32,24 +32,24 @@ namespace ReactiveDotsPlugin
             var globalTemplate = ReactiveSystemTemplates.GetGlobalTemplate();
             var usingsInsert = GeneratorUtils.GetUsingsInsert( context, reactiveSystem.ClassSyntax, GetCommonUsings() );
             var reactiveUpdatesChangedInsert = string.Empty;
-            var reactiveUpdatesAddedRemovedInsert_WithoutEcb = string.Empty;
-            var reactiveUpdatesAddedRemovedInsert_WithTempEcb = string.Empty;
-            var reactiveUpdatesAddedRemovedInsert_WithExternalEcb = string.Empty;
+            var reactiveAddMissingReactiveDataInsert_WithoutEcb = string.Empty;
+            var reactiveAddMissingReactiveDataInsert_WithTempEcb = string.Empty;
+            var reactiveAddMissingReactiveDataInsert_WithExternalEcb = string.Empty;
             var reactiveComponentsInsert = string.Empty;
             for ( int i = 0; i < reactiveSystem.ReactiveAttributes.Count; i++ ) {
                 if ( !reactiveSystem.ReactiveAttributes[i].IsValid )
                     continue;
-                reactiveUpdatesAddedRemovedInsert_WithoutEcb += "\n" + ReplaceKeywords(
-                    ReactiveSystemTemplates.GetTemplateForSystemUpdateAddedRemoved_WithoutEcb(),
+                reactiveAddMissingReactiveDataInsert_WithoutEcb += "\n" + ReplaceKeywords(
+                    ReactiveSystemTemplates.GetTemplateForSystemAddMissingReactiveData_WithoutEcb(),
                     reactiveSystem, i );
-                reactiveUpdatesAddedRemovedInsert_WithTempEcb += "\n" + ReplaceKeywords(
-                    ReactiveSystemTemplates.GetTemplateForSystemUpdateAddedRemoved_WithTempEcb(),
+                reactiveAddMissingReactiveDataInsert_WithTempEcb += "\n" + ReplaceKeywords(
+                    ReactiveSystemTemplates.GetTemplateForSystemAddMissingReactiveData_WithTempEcb(),
                     reactiveSystem, i );
-                reactiveUpdatesAddedRemovedInsert_WithExternalEcb += "\n" + ReplaceKeywords(
-                    ReactiveSystemTemplates.GetTemplateForSystemUpdateAddedRemoved_WithExternalEcb(),
+                reactiveAddMissingReactiveDataInsert_WithExternalEcb += "\n" + ReplaceKeywords(
+                    ReactiveSystemTemplates.GetTemplateForSystemAddMissingReactiveData_WithExternalEcb(),
                     reactiveSystem, i );
                 reactiveUpdatesChangedInsert += "\n" + ReplaceKeywords(
-                    ReactiveSystemTemplates.GetTemplateForSystemUpdate(),
+                    ReactiveSystemTemplates.GetTemplateForCoreReactiveChecks(),
                     reactiveSystem, i );
                 reactiveComponentsInsert += "\n" + ReplaceKeywords( ReactiveSystemTemplates.GetTemplateForComponent(),
                     reactiveSystem, i );
@@ -60,10 +60,10 @@ namespace ReactiveDotsPlugin
                 .Replace( "$$namespace$$", reactiveSystem.SystemNamespace )
                 .Replace( "$$systemNameFull$$", reactiveSystem.SystemNameFull )
                 .Replace( "$$systemName$$", reactiveSystem.SystemName )
-                .Replace( "$$placeForUpdatesAddedRemoved_WithoutEcb$$", reactiveUpdatesAddedRemovedInsert_WithoutEcb )
-                .Replace( "$$placeForUpdatesAddedRemoved_WithTempEcb$$", reactiveUpdatesAddedRemovedInsert_WithTempEcb )
-                .Replace( "$$placeForUpdatesAddedRemoved_WithExternalEcb$$",
-                    reactiveUpdatesAddedRemovedInsert_WithExternalEcb )
+                .Replace( "$$placeForAddMissingReactiveData_WithoutEcb$$", reactiveAddMissingReactiveDataInsert_WithoutEcb )
+                .Replace( "$$placeForAddMissingReactiveData_WithTempEcb$$", reactiveAddMissingReactiveDataInsert_WithTempEcb )
+                .Replace( "$$placeForAddMissingReactiveData_WithExternalEcb$$",
+                    reactiveAddMissingReactiveDataInsert_WithExternalEcb )
                 .Replace( "$$placeForUpdatesChanged$$", reactiveUpdatesChangedInsert )
                 .Replace( "$$placeForComponents$$", reactiveComponentsInsert );
             context.AddSource( $"{reactiveSystem.SystemName}.Reactive.g.cs", SourceText.From( source, Encoding.UTF8 ) );

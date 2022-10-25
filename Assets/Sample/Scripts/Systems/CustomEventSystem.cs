@@ -1,11 +1,11 @@
 ﻿using ReactiveDots;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace ReactiveDotsSample
 {
     [ReactiveEventFor( typeof(Speed), EventType.All, typeof(CustomEventSystem) )]
     [UpdateInGroup( typeof(LateSimulationSystemGroup) )]
-    [AlwaysUpdateSystem]
     [ReactiveEventSystem]
     public partial class CustomEventSystem : SystemBase
     {
@@ -17,8 +17,11 @@ namespace ReactiveDotsSample
 
         protected override void OnUpdate()
         {
-            Dependency = UpdateReactive( Dependency );
+            var ecb = new EntityCommandBuffer( Allocator.TempJob );
+            Dependency = UpdateReactive( Dependency, ecb.AsParallelWriter() );
             Dependency.Complete();
+            ecb.Playback( EntityManager );
+            ecb.Dispose();
             Dependency = FireEvents( Dependency );
         }
     }

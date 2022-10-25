@@ -11,18 +11,20 @@ namespace $$namespace$$
 {    
     public partial class $$systemName$$
     {
-        private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _reactiveAddedRemovedUpdates = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
-        private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _reactiveChangedUpdates = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
+        private List<Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle>> _reactiveAddMissingReactiveDataMethods = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle>>();
+        private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _reactiveCoreChecks = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
+        private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _reactiveRemovedChecks = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
         private List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>> _eventFires = new List<Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle>>();
 
-        // TODO: refactor this to complete dependencies only if necessary
-        private Unity.Jobs.JobHandle UpdateReactive( Unity.Jobs.JobHandle dependency )
+        private Unity.Jobs.JobHandle UpdateReactive( Unity.Jobs.JobHandle dependency, 
+            EntityCommandBuffer.ParallelWriter ecbForAdded )
         {
-            foreach( var update in _reactiveChangedUpdates )
+            foreach( var update in _reactiveCoreChecks )
                 dependency = update( this, dependency );
-            dependency.Complete();
-            foreach( var update in _reactiveAddedRemovedUpdates )
+            foreach( var update in _reactiveRemovedChecks )
                 dependency = update( this, dependency );
+            foreach( var update in _reactiveAddMissingReactiveDataMethods )
+                dependency = update( this, dependency, ecbForAdded );
             return dependency;
         }
 
@@ -34,12 +36,14 @@ namespace $$namespace$$
         }
 
         public void RegisterEventComponent( 
-            Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> updateAddedRemoved, 
-            Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> updateChanged,
+            Func<$$systemName$$, Unity.Jobs.JobHandle, EntityCommandBuffer.ParallelWriter, Unity.Jobs.JobHandle> addMissingReactiveDataMethod, 
+            Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> reactiveCoreCheck,
+            Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> reactiveRemovedCheck,
             Func<$$systemName$$, Unity.Jobs.JobHandle, Unity.Jobs.JobHandle> fireEvents )
         {
-            _reactiveAddedRemovedUpdates.Add( updateAddedRemoved );
-            _reactiveChangedUpdates.Add( updateChanged );
+            _reactiveAddMissingReactiveDataMethods.Add( addMissingReactiveDataMethod );
+            _reactiveCoreChecks.Add( reactiveCoreCheck );
+            _reactiveRemovedChecks.Add( reactiveRemovedCheck );
             _eventFires.Add( fireEvents );            
         }
 
@@ -152,8 +156,9 @@ $$placeForReactiveComponent$$
         private static void Init$$componentName$$Events( $$systemNameFull$$ sys )
         {
             sys.RegisterEventComponent(
-                $$systemName$$_$$componentName$$_Reactive.UpdateReactiveAddedRemoved,
-                $$systemName$$_$$componentName$$_Reactive.UpdateChanged,
+                $$systemName$$_$$componentName$$_Reactive.AddMissingReactiveData,
+                $$systemName$$_$$componentName$$_Reactive.CheckForChangedOrAdded,
+                $$systemName$$_$$componentName$$_Reactive.CheckForRemoved,
                 $$systemName$$_$$componentName$$_ReactiveEvents.FireEvents
             );
         }

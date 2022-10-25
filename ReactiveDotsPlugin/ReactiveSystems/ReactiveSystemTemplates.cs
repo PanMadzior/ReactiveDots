@@ -43,27 +43,28 @@
             return data;
         }
 
-        public static Unity.Jobs.JobHandle UpdateReactiveAddedRemoved( $$systemNameFull$$ sys, 
+        public static Unity.Jobs.JobHandle AddMissingReactiveDataWithEntityManager( $$systemNameFull$$ sys, 
             Unity.Jobs.JobHandle dependency )
         {
             var instanceData = GetOrCreateInstanceData( sys );
-            if( !instanceData.addedQuery.IsEmpty || !instanceData.removedQuery.IsEmpty )
+            if( !instanceData.addedQuery.IsEmpty ) {
                 dependency.Complete();
-            UpdateAdded( sys, instanceData );
-            UpdateRemoved( sys, instanceData );
+                UpdateAddedWithEntityManager( sys, instanceData );
+            }
             return dependency;
         }
 
-        private static void UpdateAdded( $$systemNameFull$$ sys, InstanceData instanceData )
+        private static void UpdateAddedWithEntityManager( $$systemNameFull$$ sys, InstanceData instanceData )
         {
             var addedEntities = instanceData.addedQuery.ToEntityArray( Allocator.Temp );
             foreach ( var e in addedEntities ) {
                 sys.EntityManager.AddComponentData( e, new $$reactiveComponentNameFull$$() {
                     Value = new ComponentReactiveData<$$componentNameFull$$>() {
-                        PreviousValue        = sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ),
-                        Added                = true,
-                        Changed              = false,
-                        Removed              = false
+                        PreviousValue = sys.EntityManager.GetComponentData<$$componentNameFull$$>( e ),
+                        Added         = true,
+                        Changed       = false,
+                        Removed       = false,
+                        _AddedCheck   = true
                     }
                 } );
             }
@@ -71,7 +72,7 @@
             addedEntities.Dispose();
         }
 
-        private static void UpdateRemoved( $$systemNameFull$$ sys, InstanceData instanceData )
+        private static void UpdateRemovedWithEntityManager( $$systemNameFull$$ sys, InstanceData instanceData )
         {
             var removedEntities = instanceData.removedQuery.ToEntityArray( Allocator.Temp );
             foreach ( var e in removedEntities ) {
@@ -89,18 +90,18 @@
             removedEntities.Dispose();
         }
 
-        public static Unity.Jobs.JobHandle UpdateAdded( $$systemNameFull$$ sys,
+        public static Unity.Jobs.JobHandle AddMissingReactiveData( $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency, EntityCommandBuffer.ParallelWriter ecb )
         {
-            return GetReactiveUpdateAddedJob( sys, out var query, ecb ).ScheduleParallel( query, dependency );
+            return GetReactiveDataAddJob( sys, out var query, ecb ).ScheduleParallel( query, dependency );
         }
 
-        private static ReactiveUpdateAddedJob GetReactiveUpdateAddedJob( $$systemNameFull$$ sys,
+        private static ReactiveDataAddJob GetReactiveDataAddJob( $$systemNameFull$$ sys,
             out EntityQuery query, EntityCommandBuffer.ParallelWriter ecb )
         {
             var instanceData = GetOrCreateInstanceData( sys );
             query = instanceData.addedQuery;
-            return new ReactiveUpdateAddedJob() {
+            return new ReactiveDataAddJob() {
                 compHandle  = sys.GetComponentTypeHandle<$$componentNameFull$$>( true ),
                 entityHandle = sys.GetEntityTypeHandle(),
                 ecb = ecb
@@ -108,7 +109,7 @@
         }
 
         [Unity.Burst.BurstCompile]
-        private struct ReactiveUpdateAddedJob : IJobEntityBatchWithIndex
+        private struct ReactiveDataAddJob : IJobEntityBatchWithIndex
         {
             [ReadOnly]
             public ComponentTypeHandle<$$componentNameFull$$> compHandle;
@@ -135,89 +136,90 @@
             {
                 var rComp = new $$reactiveComponentNameFull$$() {
                    Value = new ComponentReactiveData<$$componentNameFull$$>() {
-                        PreviousValue        = comp,
-                        Added                = true,
-                        Changed              = false,
-                        Removed              = false
+                        PreviousValue = comp,
+                        Added         = true,
+                        Changed       = false,
+                        Removed       = false,
+                        _AddedCheck   = true
                     }
                 };
                 ecb.AddComponent( indexOfFirstEntityInQuery, entity, rComp );
             }
         }
 
-        public static Unity.Jobs.JobHandle UpdateRemoved( $$systemNameFull$$ sys,
-            Unity.Jobs.JobHandle dependency, EntityCommandBuffer.ParallelWriter ecb )
+        public static Unity.Jobs.JobHandle CheckForRemoved( $$systemNameFull$$ sys, Unity.Jobs.JobHandle dependency )
         {
-            return GetReactiveUpdateRemovedJob( sys, out var query, ecb ).ScheduleParallel( query, dependency );
+            return GetCheckForRemovedJob( sys, out var query ).ScheduleParallel( query, dependency );
         }
 
-        private static ReactiveUpdateRemovedJob GetReactiveUpdateRemovedJob( $$systemNameFull$$ sys,
-            out EntityQuery query, EntityCommandBuffer.ParallelWriter ecb )
+        private static CheckForRemovedJob GetCheckForRemovedJob( $$systemNameFull$$ sys, out EntityQuery query )
         {
             var instanceData = GetOrCreateInstanceData( sys );
             query = instanceData.removedQuery;
-            return new ReactiveUpdateRemovedJob() {
-                rCompHandle = sys.GetComponentTypeHandle<$$reactiveComponentNameFull$$>( false ),
-                entityHandle = sys.GetEntityTypeHandle(),
-                ecb = ecb
+            return new CheckForRemovedJob() {
+                rCompHandle = sys.GetComponentTypeHandle<$$reactiveComponentNameFull$$>( false )
             };
         }
 
         [Unity.Burst.BurstCompile]
-        private struct ReactiveUpdateRemovedJob : IJobEntityBatchWithIndex
+        private struct CheckForRemovedJob : IJobEntityBatch
         {
             public ComponentTypeHandle<$$reactiveComponentNameFull$$> rCompHandle;
-            [ReadOnly]
-            public EntityTypeHandle entityHandle;
-            public EntityCommandBuffer.ParallelWriter ecb;
 
-            public void Execute( ArchetypeChunk batchInChunk, int batchIndex, int indexOfFirstEntityInQuery )
+            public void Execute( ArchetypeChunk batchInChunk, int batchIndex )
             {
-                var entities      = batchInChunk.GetNativeArray( entityHandle );
                 var rCompArrayPtr =
                     InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr( batchInChunk, ref rCompHandle );
                 for ( int i = 0; i < batchInChunk.Count; i++ ) {
                     Execute(
-                        entities[i],
                         ref InternalCompilerInterface
-                            .UnsafeGetRefToNativeArrayPtrElement<$$reactiveComponentNameFull$$>( rCompArrayPtr, i ),
-                        ecb,
-                        indexOfFirstEntityInQuery );
+                            .UnsafeGetRefToNativeArrayPtrElement<$$reactiveComponentNameFull$$>( rCompArrayPtr, i )
+                        );
                 }
             }
 
-            private static void Execute( Entity entity, ref $$reactiveComponentNameFull$$ rComp, EntityCommandBuffer.ParallelWriter ecb, int indexOfFirstEntityInQuery )
+            private static void Execute( ref $$reactiveComponentNameFull$$ rComp )
             {
                 var rCompData = rComp.Value;
-                if ( rCompData.Removed )
-                    ecb.RemoveComponent<$$reactiveComponentNameFull$$>( indexOfFirstEntityInQuery, entity );
-                else {
-                    rCompData.Removed = true;
-                    rComp.Value       = rCompData;
-                    ecb.SetComponent( indexOfFirstEntityInQuery, entity, rComp );
+                if ( rCompData.Removed && rCompData._AddedCheck == false ) {
+                    rComp.Value = new ComponentReactiveData<$$componentNameFull$$>() {
+                        PreviousValue = rCompData.PreviousValue,
+                        Added         = false,
+                        Changed       = false,
+                        Removed       = false,
+                        _AddedCheck   = false
+                    };
+                } else if( rCompData._AddedCheck == true ) {
+                    rComp.Value = new ComponentReactiveData<$$componentNameFull$$>() {
+                        PreviousValue = rCompData.PreviousValue,
+                        Added         = false,
+                        Changed       = false,
+                        Removed       = true,
+                        _AddedCheck   = false
+                    };
                 }
             }
         }
 
-        public static Unity.Jobs.JobHandle UpdateChanged( $$systemNameFull$$ sys,
+        public static Unity.Jobs.JobHandle CheckForChangedOrAdded( $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
         {
-            return GetReactiveUpdateChangedJob( sys, out var query ).ScheduleParallel( query, dependency );
+            return GetCheckForChangedOrAddedJob( sys, out var query ).ScheduleParallel( query, dependency );
         }
 
-        private static ReactiveUpdateChangedJob GetReactiveUpdateChangedJob( $$systemNameFull$$ sys,
+        private static CheckForChangedOrAddedJob GetCheckForChangedOrAddedJob( $$systemNameFull$$ sys,
             out EntityQuery query )
         {
             var instanceData = GetOrCreateInstanceData( sys );
             query = instanceData.changedQuery;
-            return new ReactiveUpdateChangedJob() {
+            return new CheckForChangedOrAddedJob() {
                 compHandle  = sys.GetComponentTypeHandle<$$componentNameFull$$>( true ),
                 rCompHandle = sys.GetComponentTypeHandle<$$reactiveComponentNameFull$$>( false )
             };
         }
 
         [Unity.Burst.BurstCompile]
-        private struct ReactiveUpdateChangedJob : IJobEntityBatch
+        private struct CheckForChangedOrAddedJob : IJobEntityBatch
         {
             [ReadOnly]
             public ComponentTypeHandle<$$componentNameFull$$> compHandle;
@@ -242,11 +244,25 @@
 
             private static void Execute( ref $$componentNameFull$$ comp, ref $$reactiveComponentNameFull$$ rComp )
             {
+                // Component added or enabled AND ReactiveData already exists => ADDED
+                if( rComp.Value._AddedCheck == false ) {
+                    rComp.Value = new ComponentReactiveData<$$componentNameFull$$>() {
+                        PreviousValue = comp,
+                        Added         = true,
+                        Changed       = false,
+                        Removed       = false,
+                        _AddedCheck   = true
+                    };                                        
+                    return;
+                }
+
+                // Check for CHANGED
                 rComp.Value = new ComponentReactiveData<$$componentNameFull$$>() {
-                    PreviousValue        = comp,
-                    Added                = false,
-                    Changed              = BooleanSimplifier.Any( comp.$$variableNameToCompare$$ != rComp.Value.PreviousValue.$$variableNameToCompare$$ ),
-                    Removed              = rComp.Value.Removed
+                    PreviousValue = comp,
+                    Added         = false,
+                    Changed       = BooleanSimplifier.Any( comp.$$variableNameToCompare$$ != rComp.Value.PreviousValue.$$variableNameToCompare$$ ),
+                    Removed       = rComp.Value.Removed,
+                    _AddedCheck   = rComp.Value._AddedCheck
                 };
             }
         }
@@ -268,7 +284,7 @@ namespace $$namespace$$
         /// </summary>
         public static Unity.Jobs.JobHandle UpdateReactiveNowWithEntityManager( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
-        { $$placeForUpdatesChanged$$ $$placeForUpdatesAddedRemoved_WithoutEcb$$
+        { $$placeForUpdatesChanged$$ $$placeForAddMissingReactiveData_WithoutEcb$$
             return dependency;
         }
 
@@ -278,7 +294,7 @@ namespace $$namespace$$
         /// </summary>
         public static Unity.Jobs.JobHandle UpdateReactiveNowWithEcb( this $$systemNameFull$$ sys,
             Unity.Jobs.JobHandle dependency )
-        { $$placeForUpdatesChanged$$ $$placeForUpdatesAddedRemoved_WithTempEcb$$
+        { $$placeForUpdatesChanged$$ $$placeForAddMissingReactiveData_WithTempEcb$$
             return dependency;
         }
 
@@ -306,8 +322,7 @@ namespace $$namespace$$
             Unity.Jobs.JobHandle dependency, EntityCommandBufferSystem ecbSystem )
         {
             var ecbForAdded   = ecbSystem.CreateCommandBuffer();
-            var ecbForRemoved = ecbSystem.CreateCommandBuffer();
-            dependency = UpdateReactive( sys, dependency, ecbForAdded, ecbForRemoved );
+            dependency = UpdateReactive( sys, dependency, ecbForAdded );
             ecbSystem.AddJobHandleForProducer( dependency );
             return dependency;
         }
@@ -319,12 +334,11 @@ namespace $$namespace$$
         /// If you need to know if component was removed without a one frame delay, use Entities.WithNone{Comp}.WithAll{ReactiveComp}.
         /// </summary>
         public static Unity.Jobs.JobHandle UpdateReactive( this $$systemNameFull$$ sys,
-            Unity.Jobs.JobHandle dependency, EntityCommandBuffer ecbForAdded, EntityCommandBuffer ecbForRemoved )
+            Unity.Jobs.JobHandle dependency, EntityCommandBuffer ecbForAdded )
         {
 $$placeForUpdatesChanged$$
             var ecbWriterForAdded = ecbForAdded.AsParallelWriter();
-            var ecbWriterForRemoved = ecbForRemoved.AsParallelWriter();
-$$placeForUpdatesAddedRemoved_WithExternalEcb$$
+$$placeForAddMissingReactiveData_WithExternalEcb$$
             return dependency;
         }
     }
@@ -341,42 +355,37 @@ $$placeForComponents$$
 ";
         }
 
-        public static string GetTemplateForSystemUpdateAddedRemoved_WithoutEcb()
+        public static string GetTemplateForSystemAddMissingReactiveData_WithoutEcb()
         {
-            return "            dependency = $$systemName$$_$$componentName$$_Reactive.UpdateReactiveAddedRemoved( sys, dependency );";
+            return
+                "            dependency = $$systemName$$_$$componentName$$_Reactive.AddMissingReactiveDataWithEntityManager( sys, dependency );";
         }
 
-        public static string GetTemplateForSystemUpdateAddedRemoved_WithTempEcb()
+        public static string GetTemplateForSystemAddMissingReactiveData_WithTempEcb()
         {
             return @"
             var $$systemName$$_$$componentName$$_ecbForAdded = new EntityCommandBuffer( Allocator.TempJob );
             var $$systemName$$_$$componentName$$_ecbWriterForAdded = 
                 $$systemName$$_$$componentName$$_ecbForAdded.AsParallelWriter();
-            var $$systemName$$_$$componentName$$_ecbForRemoved = new EntityCommandBuffer( Allocator.TempJob );
-            var $$systemName$$_$$componentName$$_ecbWriterForRemoved = 
-                $$systemName$$_$$componentName$$_ecbForAdded.AsParallelWriter();
 
-            dependency = $$systemName$$_$$componentName$$_Reactive.UpdateAdded( sys, dependency, $$systemName$$_$$componentName$$_ecbWriterForAdded );
-            dependency = $$systemName$$_$$componentName$$_Reactive.UpdateRemoved( sys, dependency, $$systemName$$_$$componentName$$_ecbWriterForRemoved );
+            dependency = $$systemName$$_$$componentName$$_Reactive.AddMissingReactiveData( sys, dependency, $$systemName$$_$$componentName$$_ecbWriterForAdded );;
             dependency.Complete();
 
             $$systemName$$_$$componentName$$_ecbForAdded.Playback( sys.EntityManager );
-            $$systemName$$_$$componentName$$_ecbForAdded.Dispose();
-            $$systemName$$_$$componentName$$_ecbForRemoved.Playback( sys.EntityManager );
-            $$systemName$$_$$componentName$$_ecbForRemoved.Dispose();";
+            $$systemName$$_$$componentName$$_ecbForAdded.Dispose();";
         }
 
-        public static string GetTemplateForSystemUpdateAddedRemoved_WithExternalEcb()
+        public static string GetTemplateForSystemAddMissingReactiveData_WithExternalEcb()
         {
             return @"
-            dependency = $$systemName$$_$$componentName$$_Reactive.UpdateAdded( sys, dependency, ecbWriterForAdded );
-            dependency = $$systemName$$_$$componentName$$_Reactive.UpdateRemoved( sys, dependency, ecbWriterForRemoved );";
+            dependency = $$systemName$$_$$componentName$$_Reactive.AddMissingReactiveData( sys, dependency, ecbWriterForAdded );";
         }
 
-        public static string GetTemplateForSystemUpdate()
+        public static string GetTemplateForCoreReactiveChecks()
         {
             return
-                "            dependency = $$systemName$$_$$componentName$$_Reactive.UpdateChanged( sys, dependency );";
+                "            dependency = $$systemName$$_$$componentName$$_Reactive.CheckForChangedOrAdded( sys, dependency );" +
+                "            dependency = $$systemName$$_$$componentName$$_Reactive.CheckForRemoved( sys, dependency );";
         }
 
         public static string GetTemplateForReactiveComponent()

@@ -32,7 +32,8 @@ namespace ReactiveDots.Tests
             EntityManager.AddComponentData( entity, new CompA() { Value = 0 } );
             _testReactive.Update();
 
-            var reactiveDataForA = EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
+            var reactiveDataForA =
+                EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
             Assert.True( reactiveDataForA.Added,
                 "Reactive data .Added for CompA should be true in first update, but it is false!" );
             Assert.False( EntityManager.HasComponent<TestMultiReactiveSystem.CompBReactive>( entity ),
@@ -43,10 +44,11 @@ namespace ReactiveDots.Tests
             reactiveDataForA = EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
             Assert.False( reactiveDataForA.Added,
                 "Reactive data .Added for CompA should be false in second update, but it is true!" );
-            var reactiveDataForB = EntityManager.GetComponentData<TestMultiReactiveSystem.CompBReactive>( entity ).Value;
+            var reactiveDataForB =
+                EntityManager.GetComponentData<TestMultiReactiveSystem.CompBReactive>( entity ).Value;
             Assert.True( reactiveDataForB.Added,
                 "Reactive data .Added for CompB should be true, but it is false!" );
-            
+
             _testReactive.Update();
             reactiveDataForB = EntityManager.GetComponentData<TestMultiReactiveSystem.CompBReactive>( entity ).Value;
             Assert.False( reactiveDataForB.Added,
@@ -60,7 +62,8 @@ namespace ReactiveDots.Tests
             EntityManager.AddComponentData( entity, new CompA() { Value = 0 } );
             _testReactive.Update();
 
-            var reactiveDataForA = EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
+            var reactiveDataForA =
+                EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
             Assert.False( reactiveDataForA.Changed,
                 "Reactive data .Changed for CompA should be false in first update, but it is true!" );
             Assert.False( EntityManager.HasComponent<TestMultiReactiveSystem.CompBReactive>( entity ),
@@ -72,15 +75,16 @@ namespace ReactiveDots.Tests
             reactiveDataForA = EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
             Assert.True( reactiveDataForA.Changed,
                 "Reactive data .Changed for CompA should be true in second update, but it is false!" );
-            var reactiveDataForB = EntityManager.GetComponentData<TestMultiReactiveSystem.CompBReactive>( entity ).Value;
+            var reactiveDataForB =
+                EntityManager.GetComponentData<TestMultiReactiveSystem.CompBReactive>( entity ).Value;
             Assert.False( reactiveDataForB.Changed,
                 "Reactive data .Changed for CompB should be false, but it is true!" );
-            
+
             EntityManager.SetComponentData( entity, new CompB() { Value = 11 } );
             _testReactive.Update();
             reactiveDataForA = EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
             Assert.False( reactiveDataForA.Changed,
-                "Reactive data .Changed for CompA should be false in third update, but it is true!" );        
+                "Reactive data .Changed for CompA should be false in third update, but it is true!" );
             reactiveDataForB = EntityManager.GetComponentData<TestMultiReactiveSystem.CompBReactive>( entity ).Value;
             Assert.True( reactiveDataForB.Changed,
                 "Reactive data .Added for CompB should be true in third update, but it is false!" );
@@ -94,8 +98,10 @@ namespace ReactiveDots.Tests
             EntityManager.AddComponentData( entity, new CompB() { Value = 10 } );
             _testReactive.Update();
 
-            var reactiveDataForA = EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
-            var reactiveDataForB = EntityManager.GetComponentData<TestMultiReactiveSystem.CompBReactive>( entity ).Value;
+            var reactiveDataForA =
+                EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
+            var reactiveDataForB =
+                EntityManager.GetComponentData<TestMultiReactiveSystem.CompBReactive>( entity ).Value;
             Assert.False( reactiveDataForA.Removed,
                 "Reactive data .Removed for CompA should be false in first update, but it is true!" );
             Assert.False( reactiveDataForB.Removed,
@@ -112,8 +118,13 @@ namespace ReactiveDots.Tests
 
             _testReactive.Update();
             reactiveDataForB = EntityManager.GetComponentData<TestMultiReactiveSystem.CompBReactive>( entity ).Value;
-            Assert.False( EntityManager.HasComponent<TestMultiReactiveSystem.CompAReactive>( entity ),
-                "Reactive data for CompA should not be present in the second frame after main component removal, but it is!" );
+            Assert.True( EntityManager.HasComponent<TestMultiReactiveSystem.CompAReactive>( entity ),
+                "Reactive data for CompA should still be present in the second frame after main component removal, but it is NOT!" );
+            reactiveDataForA = EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
+            Assert.False( reactiveDataForA.Removed,
+                "Reactive data .Removed for CompA should be false in the second frame after main component removal, but it is true!" );
+            Assert.False( reactiveDataForA._AddedCheck,
+                "Reactive data ._AddedCheck for CompA should be false in the second frame after main component removal, but it is true!" );
             Assert.False( reactiveDataForB.Removed,
                 "Reactive data .Removed for CompB should still be false after CompA removal, but it is true!" );
         }
@@ -126,8 +137,10 @@ namespace ReactiveDots.Tests
             EntityManager.AddComponentData( entity, new CompB() { Value = 10 } );
             _testReactive.Update();
 
-            var reactiveDataForA = EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
-            var reactiveDataForB = EntityManager.GetComponentData<TestMultiReactiveSystem.CompBReactive>( entity ).Value;
+            var reactiveDataForA =
+                EntityManager.GetComponentData<TestMultiReactiveSystem.CompAReactive>( entity ).Value;
+            var reactiveDataForB =
+                EntityManager.GetComponentData<TestMultiReactiveSystem.CompBReactive>( entity ).Value;
             Assert.False( reactiveDataForA.Removed,
                 "Reactive data .Removed for CompA should be false in first update, but it is true!" );
             Assert.False( reactiveDataForB.Removed,
@@ -169,7 +182,7 @@ namespace ReactiveDots.Tests
         {
             public ComponentReactiveData<CompA> Value;
         }
-        
+
         public struct CompBReactive : ICleanupComponentData
         {
             public ComponentReactiveData<CompB> Value;

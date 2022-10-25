@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 
 namespace ReactiveDots
 {
@@ -17,8 +18,11 @@ namespace ReactiveDots
 
         protected override void OnUpdate()
         {
-            Dependency = UpdateReactive( Dependency );
+            var ecb = new EntityCommandBuffer( Allocator.TempJob );
+            Dependency = UpdateReactive( Dependency, ecb.AsParallelWriter() );
             Dependency.Complete();
+            ecb.Playback( EntityManager );
+            ecb.Dispose();
             Dependency = FireEvents( Dependency );
         }
     }

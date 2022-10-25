@@ -91,8 +91,14 @@ namespace ReactiveDots.Tests
                 "Reactive data .Added should be true after main component removal, but it is false!" );
 
             _testReactive.Update();
-            Assert.False( EntityManager.HasComponent<TestReactiveWithExternalEcbSystem.TestComponentReactive>( entity ),
-                "Reactive data should not be present in the second frame after main component removal, but it is!" );
+            Assert.True( EntityManager.HasComponent<TestReactiveWithExternalEcbSystem.TestComponentReactive>( entity ),
+                "Reactive data should still be present in the second frame after main component removal, but it is NOT!" );
+            var reactiveData3 = EntityManager
+                .GetComponentData<TestReactiveWithExternalEcbSystem.TestComponentReactive>( entity ).Value;
+            Assert.False( reactiveData3.Removed,
+                "Reactive data .Removed should be false in the second frame after main component removal, but it is true!" );
+            Assert.False( reactiveData3._AddedCheck,
+                "Reactive data ._AddedCheck should be false in the second frame after main component removal, but it is true!" );
         }
 
         [Test]
@@ -144,14 +150,11 @@ namespace ReactiveDots.Tests
 
         protected override void OnUpdate()
         {
-            var ecbForAdded   = new EntityCommandBuffer( Allocator.TempJob );
-            var ecbForRemoved = new EntityCommandBuffer( Allocator.TempJob );
-            Dependency = this.UpdateReactive( Dependency, ecbForAdded, ecbForRemoved );
+            var ecbForAdded = new EntityCommandBuffer( Allocator.TempJob );
+            Dependency = this.UpdateReactive( Dependency, ecbForAdded );
             Dependency.Complete();
             ecbForAdded.Playback( EntityManager );
             ecbForAdded.Dispose();
-            ecbForRemoved.Playback( EntityManager );
-            ecbForRemoved.Dispose();
         }
     }
 }
