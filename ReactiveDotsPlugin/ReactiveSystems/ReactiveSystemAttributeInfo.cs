@@ -5,8 +5,8 @@ namespace ReactiveDotsPlugin
 {
     public class ReactiveSystemAttributeInfo
     {
-        public AttributeSyntax AttributeSyntax { private set; get; }
-        public ClassDeclarationSyntax SystemClassSyntax { private set; get; }
+        public AttributeSyntax AttributeSyntax { get; }
+        public ClassDeclarationSyntax SystemClassSyntax { get; }
 
         public string ComponentName { private set; get; }
         public string ComponentNamespace { private set; get; }
@@ -16,7 +16,8 @@ namespace ReactiveDotsPlugin
         public string ReactiveComponentNamespace { private set; get; }
         public string ReactiveComponentNameFull { private set; get; }
 
-        public string FieldToCompareName { private set; get; }
+        public List<string> FieldsToCompareName { get; }
+        public bool IsTagComponent => FieldsToCompareName.Count == 0;
 
         public bool IsValid => !string.IsNullOrEmpty( ComponentName ) && !string.IsNullOrEmpty( ReactiveComponentName );
 
@@ -32,7 +33,10 @@ namespace ReactiveDotsPlugin
                     GetReactiveComponentInfo( context, attribute.ArgumentList.Arguments[1] );
             }
 
-            FieldToCompareName = GeneratorUtils.GetAttributeArgumentValue( attribute, "FieldNameToCompare", "Value" );
+            FieldsToCompareName = new List<string>(
+                GeneratorUtils.GetAttributeArgumentValue( attribute, "FieldNameToCompare", "Value" ).Split( ',' )
+                    .Where( ( str ) => !string.IsNullOrEmpty( str ) )
+            );
         }
 
         private void GetComponentInfo( GeneratorExecutionContext context, AttributeArgumentSyntax arg )

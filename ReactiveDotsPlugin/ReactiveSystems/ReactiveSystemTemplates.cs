@@ -15,6 +15,7 @@
             public EntityQuery changedQuery;
             public EntityQuery cleanupQuery;
             public EntityCommandBufferSystem ecbSystem;
+            public bool isTagComponent;
         }
 
         private static Dictionary<$$systemNameFull$$, InstanceData> s_instances =
@@ -52,6 +53,7 @@
                 ComponentType.Exclude<$$componentNameFull$$>(),
                 ComponentType.Exclude<ReactiveEntityTag>()
             );
+            data.isTagComponent = $$isTagComponent$$;
             return data;
         }
 
@@ -92,7 +94,8 @@
             return new ReactiveDataAddJob() {
                 compHandle  = sys.GetComponentTypeHandle<$$componentNameFull$$>( true ),
                 entityHandle = sys.GetEntityTypeHandle(),
-                ecb = ecb
+                ecb = ecb,
+                isTagComponent = instanceData.isTagComponent
             };
         }
 
@@ -104,19 +107,31 @@
             [ReadOnly]
             public EntityTypeHandle entityHandle;
             public EntityCommandBuffer.ParallelWriter ecb;
+            public bool isTagComponent;
 
             public void Execute( ArchetypeChunk batchInChunk, int batchIndex, int indexOfFirstEntityInQuery )
             {
-                var entities      = batchInChunk.GetNativeArray( entityHandle );
-                var compsArrayPtr =
-                    InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( batchInChunk, ref compHandle );
-                for ( int i = 0; i < batchInChunk.Count; i++ ) {
-                    Execute(
-                        entities[i],
-                        ref InternalCompilerInterface
-                            .UnsafeGetRefToNativeArrayPtrElement<$$componentNameFull$$>( compsArrayPtr, i ),
-                        ecb,
-                        indexOfFirstEntityInQuery );
+                var entities = batchInChunk.GetNativeArray( entityHandle );
+                if( !isTagComponent ) {
+                    var compsArrayPtr = 
+                        InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( batchInChunk, ref compHandle );
+                    for ( int i = 0; i < batchInChunk.Count; i++ ) {
+                        Execute(
+                            entities[i],
+                            ref InternalCompilerInterface
+                                .UnsafeGetRefToNativeArrayPtrElement<$$componentNameFull$$>( compsArrayPtr, i ),
+                            ecb,
+                            indexOfFirstEntityInQuery );
+                    }
+                } else {
+                    var tempComp = new $$componentNameFull$$();
+                    for ( int i = 0; i < batchInChunk.Count; i++ ) {
+                        Execute(
+                            entities[i],
+                            ref tempComp,
+                            ecb,
+                            indexOfFirstEntityInQuery );
+                    }
                 }
             }
 
@@ -281,6 +296,12 @@
             }
         }
 
+        public static bool CheckIfChanged( $$componentNameFull$$ prev, $$componentNameFull$$ curr )
+        {
+            var result = false; $$placeForCheckIfChangedBody$$
+            return result;
+        }
+
         public static Unity.Jobs.JobHandle CheckForChangedOrAddedWithEntityManager( $$systemNameFull$$ sys, 
             Unity.Jobs.JobHandle dependency )
         {
@@ -306,7 +327,7 @@
                         rComp.Value = new ComponentReactiveData<$$componentNameFull$$>() {
                             PreviousValue = comp,
                             Added         = false,
-                            Changed       = BooleanSimplifier.Any( comp.$$variableNameToCompare$$ != rComp.Value.PreviousValue.$$variableNameToCompare$$ ),
+                            Changed       = CheckIfChanged( comp, rComp.Value.PreviousValue ),
                             Removed       = rComp.Value.Removed,
                             _AddedCheck   = rComp.Value._AddedCheck
                         };
@@ -332,7 +353,8 @@
             query = instanceData.changedQuery;
             return new CheckForChangedOrAddedJob() {
                 compHandle  = sys.GetComponentTypeHandle<$$componentNameFull$$>( true ),
-                rCompHandle = sys.GetComponentTypeHandle<$$reactiveComponentNameFull$$>( false )
+                rCompHandle = sys.GetComponentTypeHandle<$$reactiveComponentNameFull$$>( false ),
+                isTagComponent = instanceData.isTagComponent
             };
         }
 
@@ -342,21 +364,35 @@
             [ReadOnly]
             public ComponentTypeHandle<$$componentNameFull$$> compHandle;
             public ComponentTypeHandle<$$reactiveComponentNameFull$$> rCompHandle;
+            public bool isTagComponent;
 
             public void Execute( ArchetypeChunk batchInChunk, int batchIndex )
             {
-                var compsArrayPtr =
-                    InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( batchInChunk, ref compHandle );
                 var rCompArrayPtr =
                     InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr( batchInChunk, ref rCompHandle );
-                for ( int i = 0; i < batchInChunk.Count; i++ ) {
-                    Execute(
-                        ref InternalCompilerInterface
-                            .UnsafeGetRefToNativeArrayPtrElement<$$componentNameFull$$>( compsArrayPtr, i ),
-                        ref InternalCompilerInterface
-                            .UnsafeGetRefToNativeArrayPtrElement<$$reactiveComponentNameFull$$>(
-                                rCompArrayPtr, i ) 
-                        );
+                
+                if( !isTagComponent ) {
+                    var compsArrayPtr =
+                        InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( batchInChunk, ref compHandle );
+                    for ( int i = 0; i < batchInChunk.Count; i++ ) {
+                        Execute(
+                            ref InternalCompilerInterface
+                                .UnsafeGetRefToNativeArrayPtrElement<$$componentNameFull$$>( compsArrayPtr, i ),
+                            ref InternalCompilerInterface
+                                .UnsafeGetRefToNativeArrayPtrElement<$$reactiveComponentNameFull$$>(
+                                    rCompArrayPtr, i ) 
+                            );
+                    }
+                } else {
+                    var tempComp = new $$componentNameFull$$();
+                    for ( int i = 0; i < batchInChunk.Count; i++ ) {
+                        Execute(
+                            ref tempComp,
+                            ref InternalCompilerInterface
+                                .UnsafeGetRefToNativeArrayPtrElement<$$reactiveComponentNameFull$$>(
+                                    rCompArrayPtr, i ) 
+                            );
+                    }
                 }
             }
 
@@ -378,7 +414,7 @@
                 rComp.Value = new ComponentReactiveData<$$componentNameFull$$>() {
                     PreviousValue = comp,
                     Added         = false,
-                    Changed       = BooleanSimplifier.Any( comp.$$variableNameToCompare$$ != rComp.Value.PreviousValue.$$variableNameToCompare$$ ),
+                    Changed       = CheckIfChanged( comp, rComp.Value.PreviousValue ),
                     Removed       = rComp.Value.Removed,
                     _AddedCheck   = rComp.Value._AddedCheck
                 };
@@ -608,6 +644,12 @@ $$placeForComponents$$
         {
             public ComponentReactiveData<$$componentNameFull$$> Value;
         }";
+        }
+
+        public static string GetTemplateForCheckIfChangedInstruction( string variableName )
+        {
+            return @$"
+            result = result || BooleanSimplifier.Any( prev.{variableName} != curr.{variableName} );";
         }
     }
 }

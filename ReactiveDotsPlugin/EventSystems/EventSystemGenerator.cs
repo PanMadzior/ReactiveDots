@@ -52,6 +52,7 @@ namespace ReactiveDotsPlugin
                 .Replace( "$$namespace$$", eventComponent.ComponentNamespace )
                 .Replace( "$$systemName$$", eventComponent.EventSystemClassName )
                 .Replace( "$$systemNameFull$$", eventComponent.EventSystemClassNameFull )
+                .Replace( "$$isTagComponent$$", eventComponent.IsTagComponent ? "true" : "false" )
                 .Replace( "$$componentName$$", eventComponent.ComponentName )
                 .Replace( "$$componentNameFull$$", eventComponent.ComponentNameFull );
             context.AddSource(
@@ -70,6 +71,7 @@ namespace ReactiveDotsPlugin
                 .Replace( "$$namespace$$", eventComponent.ComponentNamespace )
                 .Replace( "$$systemName$$", eventComponent.EventSystemClassName )
                 .Replace( "$$systemNameFull$$", eventComponent.EventSystemClassNameFull )
+                .Replace( "$$isTagComponent$$", eventComponent.IsTagComponent ? "true" : "false" )
                 .Replace( "$$componentName$$", eventComponent.ComponentName )
                 .Replace( "$$componentNameFull$$", eventComponent.ComponentNameFull )
                 .Replace( "$$reactiveComponentNameFull$$", eventComponent.ReactiveComponentNameFull )
@@ -84,20 +86,30 @@ namespace ReactiveDotsPlugin
         {
             var template = ReactiveSystemTemplates.GetTemplateForReactiveComponent();
             return template
+                .Replace( "$$isTagComponent$$", componentInfo.IsTagComponent ? "true" : "false" )
                 .Replace( "$$componentName$$", componentInfo.ComponentName )
                 .Replace( "$$componentNameFull$$", componentInfo.ComponentNameFull );
         }
 
         private string GetReactiveJobsInsert( EventComponentInfo componentInfo )
         {
-            var template = ReactiveSystemTemplates.GetTemplateForComponent();
+            var template                 = ReactiveSystemTemplates.GetTemplateForComponent();
+            var checkIfChangedBodyInsert = string.Empty;
+
+            for ( int i = 0; i < componentInfo.FieldsToCompareName.Count; i++ ) {
+                var check = ReactiveSystemTemplates.GetTemplateForCheckIfChangedInstruction(
+                    componentInfo.FieldsToCompareName[i] );
+                checkIfChangedBodyInsert += check;
+            }
+
             return template
+                .Replace( "$$placeForCheckIfChangedBody$$", checkIfChangedBodyInsert )
                 .Replace( "$$systemNameFull$$", componentInfo.EventSystemClassNameFull )
                 .Replace( "$$systemName$$", componentInfo.EventSystemClassName )
+                .Replace( "$$isTagComponent$$", componentInfo.IsTagComponent ? "true" : "false" )
                 .Replace( "$$componentName$$", componentInfo.ComponentName )
                 .Replace( "$$componentNameFull$$", componentInfo.ComponentNameFull )
-                .Replace( "$$reactiveComponentNameFull$$", componentInfo.ReactiveComponentNameFull )
-                .Replace( "$$variableNameToCompare$$", componentInfo.FieldToCompareName );
+                .Replace( "$$reactiveComponentNameFull$$", componentInfo.ReactiveComponentNameFull );
         }
 
         private HashSet<string> GetCommonUsings()

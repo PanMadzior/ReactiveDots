@@ -6,9 +6,9 @@ namespace ReactiveDotsPlugin
     public class EventComponentInfo
     {
         public EventType EventType { private set; get; }
-        public StructDeclarationSyntax? StructSyntax { private set; get; }
-        public TypeDeclarationSyntax DeclaredOn { private set; get; }
-        public AttributeSyntax Attribute { private set; get; }
+        public StructDeclarationSyntax? StructSyntax { get; }
+        public TypeDeclarationSyntax DeclaredOn { get; }
+        public AttributeSyntax Attribute { get; }
 
         public string ComponentName { private set; get; }
         public string ComponentNamespace { private set; get; }
@@ -18,7 +18,9 @@ namespace ReactiveDotsPlugin
         public string EventSystemClassNamespace { private set; get; }
         public string EventSystemClassNameFull { private set; get; }
 
-        public string FieldToCompareName { private set; get; }
+        public List<string> FieldsToCompareName { get; }
+        public bool IsTagComponent => FieldsToCompareName.Count == 0;
+
         public string ReactiveComponentNameFull =>
             $"{ComponentNamespace}.{EventSystemClassName}_{ComponentName}_ReactiveEvents.{ComponentName}Reactive";
 
@@ -27,20 +29,28 @@ namespace ReactiveDotsPlugin
         // [ReactiveEventFor]
         public EventComponentInfo( TypeDeclarationSyntax typeSyntax, AttributeSyntax attribute )
         {
-            DeclaredOn         = typeSyntax;
-            Attribute          = attribute;
-            EventType          = EventType.All; // default
-            FieldToCompareName = GeneratorUtils.GetAttributeArgumentValue( Attribute, "FieldNameToCompare", "Value" );
+            DeclaredOn = typeSyntax;
+            Attribute  = attribute;
+            EventType  = EventType.All; // default
+
+            FieldsToCompareName = new List<string>(
+                GeneratorUtils.GetAttributeArgumentValue( attribute, "FieldNameToCompare", "Value" ).Split( ',' )
+                    .Where( ( str ) => !string.IsNullOrEmpty( str ) )
+            );
         }
 
         // [ReactiveEvent]
         public EventComponentInfo( StructDeclarationSyntax structNode, AttributeSyntax attribute )
         {
-            StructSyntax       = structNode;
-            DeclaredOn         = structNode;
-            Attribute          = attribute;
-            EventType          = EventType.All; // default
-            FieldToCompareName = GeneratorUtils.GetAttributeArgumentValue( Attribute, "FieldNameToCompare", "Value" );
+            StructSyntax = structNode;
+            DeclaredOn   = structNode;
+            Attribute    = attribute;
+            EventType    = EventType.All; // default
+
+            FieldsToCompareName = new List<string>(
+                GeneratorUtils.GetAttributeArgumentValue( attribute, "FieldNameToCompare", "Value" ).Split( ',' )
+                    .Where( ( str ) => !string.IsNullOrEmpty( str ) )
+            );
 
             ComponentName      = StructSyntax.Identifier.Text;
             ComponentNamespace = GeneratorUtils.GetNamespaceFor( StructSyntax );

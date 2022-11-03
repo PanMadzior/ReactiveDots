@@ -11,7 +11,7 @@ namespace ReactiveDots
         /// <summary>
         /// Field name in your component which will be used for comparing current and previous values of your component to determine if it has changed since the last system update.
         /// </summary>
-        public string FieldNameToCompare;
+        public string FieldNameToCompare = "Value";
 
         /// <summary>
         /// Use this attribute on a system which you want to react to changes to the specified component.
@@ -25,7 +25,6 @@ namespace ReactiveDots
         {
             ComponentType      = componentType;
             RComponentType     = rComponentType;
-            FieldNameToCompare = "Value";
         }
     }
 }

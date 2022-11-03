@@ -64,8 +64,10 @@ namespace ReactiveDotsPlugin
                 .Replace( "$$namespace$$", reactiveSystem.SystemNamespace )
                 .Replace( "$$systemNameFull$$", reactiveSystem.SystemNameFull )
                 .Replace( "$$systemName$$", reactiveSystem.SystemName )
-                .Replace( "$$placeForAddMissingReactiveData_WithoutEcb$$", reactiveAddMissingReactiveDataInsert_WithoutEcb )
-                .Replace( "$$placeForAddMissingReactiveData_WithTempEcb$$", reactiveAddMissingReactiveDataInsert_WithTempEcb )
+                .Replace( "$$placeForAddMissingReactiveData_WithoutEcb$$",
+                    reactiveAddMissingReactiveDataInsert_WithoutEcb )
+                .Replace( "$$placeForAddMissingReactiveData_WithTempEcb$$",
+                    reactiveAddMissingReactiveDataInsert_WithTempEcb )
                 .Replace( "$$placeForAddMissingReactiveData_WithExternalEcb$$",
                     reactiveAddMissingReactiveDataInsert_WithExternalEcb )
                 .Replace( "$$placeForUpdatesChanged$$", reactiveUpdatesChangedInsert )
@@ -76,15 +78,24 @@ namespace ReactiveDotsPlugin
 
         private string ReplaceKeywords( string template, ReactiveSystemInfo systemInfo, int attributeIndex )
         {
+            var checkIfChangedBodyInsert = string.Empty;
+
+            for ( int i = 0; i < systemInfo.ReactiveAttributes[attributeIndex].FieldsToCompareName.Count; i++ ) {
+                var check = ReactiveSystemTemplates.GetTemplateForCheckIfChangedInstruction(
+                    systemInfo.ReactiveAttributes[attributeIndex].FieldsToCompareName[i] );
+                checkIfChangedBodyInsert += check;
+            }
+
             return template
+                .Replace( "$$placeForCheckIfChangedBody$$", checkIfChangedBodyInsert )
                 .Replace( "$$systemNameFull$$", systemInfo.SystemNameFull )
                 .Replace( "$$systemName$$", systemInfo.SystemName )
+                .Replace( "$$isTagComponent$$",
+                    systemInfo.ReactiveAttributes[attributeIndex].IsTagComponent ? "true" : "false" )
                 .Replace( "$$componentName$$", systemInfo.ReactiveAttributes[attributeIndex].ComponentName )
                 .Replace( "$$componentNameFull$$", systemInfo.ReactiveAttributes[attributeIndex].ComponentNameFull )
                 .Replace( "$$reactiveComponentNameFull$$",
-                    systemInfo.ReactiveAttributes[attributeIndex].ReactiveComponentNameFull )
-                .Replace( "$$variableNameToCompare$$",
-                    systemInfo.ReactiveAttributes[attributeIndex].FieldToCompareName );
+                    systemInfo.ReactiveAttributes[attributeIndex].ReactiveComponentNameFull );
         }
 
         private HashSet<string> GetCommonUsings()

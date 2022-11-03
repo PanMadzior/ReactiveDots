@@ -31,6 +31,12 @@ namespace ReactiveDotsSample
 
         protected override void OnUpdate()
         {
+            Entities.ForEach( ( ref Bounces bounces, in MoveDirectionReactive moveDirReactive ) =>
+            {
+                if ( moveDirReactive.Value.Changed )
+                    bounces.Value += 1;
+            } ).ScheduleParallel();
+            
             switch ( updateType ) {
                 case UpdateType.NowWithEntityManager:
                     Dependency = this.UpdateReactiveNowWithEntityManager( Dependency );
@@ -46,12 +52,6 @@ namespace ReactiveDotsSample
                     _externalCommandBufferSystem.AddJobHandleForProducer( Dependency );
                     break;
             }
-
-            Entities.ForEach( ( ref Bounces bounces, in MoveDirectionReactive moveDirReactive ) =>
-            {
-                if ( moveDirReactive.Value.Changed )
-                    bounces.Value += 1;
-            } ).ScheduleParallel();
         }
     }
 }
