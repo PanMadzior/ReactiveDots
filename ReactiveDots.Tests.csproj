@@ -56,6 +56,8 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\ReactiveDots\Tests\TestBase.cs" />
+     <Compile Include="Assets\ReactiveDots\Tests\EnableableComponentReactiveSystemTests.cs" />
+     <Compile Include="Assets\ReactiveDots\Tests\TagComponentReactiveSystemTests.cs" />
      <Compile Include="Assets\ReactiveDots\Tests\ForComponentEventSystemTests.cs" />
      <Compile Include="Assets\ReactiveDots\Tests\MultiReactiveSystemTests.cs" />
      <Compile Include="Assets\ReactiveDots\Tests\BasicReactiveSystemWithExternalEcbTests.cs" />
