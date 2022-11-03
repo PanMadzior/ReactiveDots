@@ -6,6 +6,11 @@ namespace ReactiveDotsSample
 {
     public partial class BallMovementSystem : SystemBase
     {
+        protected override void OnCreate()
+        {
+            RequireForUpdate<Arena>();
+        }
+
         protected override void OnUpdate()
         {
             var arenaSize   = GetSingleton<Arena>().Size;
