@@ -100,7 +100,7 @@
         }
 
         [Unity.Burst.BurstCompile]
-        private struct ReactiveDataAddJob : IJobEntityBatchWithIndex
+        private struct ReactiveDataAddJob : IJobChunk
         {
             [ReadOnly]
             public ComponentTypeHandle<$$componentNameFull$$> compHandle;
@@ -109,33 +109,35 @@
             public EntityCommandBuffer.ParallelWriter ecb;
             public bool isTagComponent;
 
-            public void Execute( ArchetypeChunk batchInChunk, int batchIndex, int indexOfFirstEntityInQuery )
+            public void Execute( in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask )
             {
-                var entities = batchInChunk.GetNativeArray( entityHandle );
+                var entities = chunk.GetNativeArray( entityHandle );
                 if( !isTagComponent ) {
                     var compsArrayPtr = 
-                        InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( batchInChunk, ref compHandle );
-                    for ( int i = 0; i < batchInChunk.Count; i++ ) {
+                        InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( chunk, ref compHandle );
+                    var enumerator = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count); 
+                    while( enumerator.NextEntityIndex( out int i ) ) {
                         Execute(
                             entities[i],
                             ref InternalCompilerInterface
                                 .UnsafeGetRefToNativeArrayPtrElement<$$componentNameFull$$>( compsArrayPtr, i ),
                             ecb,
-                            indexOfFirstEntityInQuery );
+                            unfilteredChunkIndex );
                     }
                 } else {
                     var tempComp = new $$componentNameFull$$();
-                    for ( int i = 0; i < batchInChunk.Count; i++ ) {
+                    var enumerator = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count); 
+                    while( enumerator.NextEntityIndex( out int i ) ) {
                         Execute(
                             entities[i],
                             ref tempComp,
                             ecb,
-                            indexOfFirstEntityInQuery );
+                            unfilteredChunkIndex );
                     }
                 }
             }
 
-            private static void Execute( Entity entity, ref $$componentNameFull$$ comp, EntityCommandBuffer.ParallelWriter ecb, int indexOfFirstEntityInQuery )
+            private static void Execute( Entity entity, ref $$componentNameFull$$ comp, EntityCommandBuffer.ParallelWriter ecb, int unfilteredChunkIndex )
             {
                 var rComp = new $$reactiveComponentNameFull$$() {
                    Value = new ComponentReactiveData<$$componentNameFull$$>() {
@@ -146,7 +148,7 @@
                         _AddedCheck   = true
                     }
                 };
-                ecb.AddComponent( indexOfFirstEntityInQuery, entity, rComp );
+                ecb.AddComponent( unfilteredChunkIndex, entity, rComp );
             }
         }
 
@@ -183,26 +185,27 @@
         }
 
         [Unity.Burst.BurstCompile]
-        private struct ReactiveEntityTagAddJob : IJobEntityBatchWithIndex
+        private struct ReactiveEntityTagAddJob : IJobChunk
         {
             [ReadOnly]
             public EntityTypeHandle entityHandle;
             public EntityCommandBuffer.ParallelWriter ecb;
 
-            public void Execute( ArchetypeChunk batchInChunk, int batchIndex, int indexOfFirstEntityInQuery )
+            public void Execute( in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask )
             {
-                var entities      = batchInChunk.GetNativeArray( entityHandle );
-                for ( int i = 0; i < batchInChunk.Count; i++ ) {
+                var entities = chunk.GetNativeArray( entityHandle );
+                var enumerator = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count); 
+                while( enumerator.NextEntityIndex( out int i ) ) {
                     Execute(
                         entities[i],
                         ecb,
-                        indexOfFirstEntityInQuery );
+                        unfilteredChunkIndex );
                 }
             }
 
-            private static void Execute( Entity entity, EntityCommandBuffer.ParallelWriter ecb, int indexOfFirstEntityInQuery )
+            private static void Execute( Entity entity, EntityCommandBuffer.ParallelWriter ecb, int unfilteredChunkIndex )
             {
-                ecb.AddComponent( indexOfFirstEntityInQuery, entity, new ReactiveEntityTag() );
+                ecb.AddComponent( unfilteredChunkIndex, entity, new ReactiveEntityTag() );
             }
         }
 
@@ -257,15 +260,16 @@
         }
 
         [Unity.Burst.BurstCompile]
-        private struct CheckForRemovedJob : IJobEntityBatch
+        private struct CheckForRemovedJob : IJobChunk
         {
             public ComponentTypeHandle<$$reactiveComponentNameFull$$> rCompHandle;
 
-            public void Execute( ArchetypeChunk batchInChunk, int batchIndex )
+            public void Execute( in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask )
             {
                 var rCompArrayPtr =
-                    InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr( batchInChunk, ref rCompHandle );
-                for ( int i = 0; i < batchInChunk.Count; i++ ) {
+                    InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr( chunk, ref rCompHandle );
+                var enumerator = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count); 
+                while( enumerator.NextEntityIndex( out int i ) ) {
                     Execute(
                         ref InternalCompilerInterface
                             .UnsafeGetRefToNativeArrayPtrElement<$$reactiveComponentNameFull$$>( rCompArrayPtr, i )
@@ -359,22 +363,23 @@
         }
 
         [Unity.Burst.BurstCompile]
-        private struct CheckForChangedOrAddedJob : IJobEntityBatch
+        private struct CheckForChangedOrAddedJob : IJobChunk
         {
             [ReadOnly]
             public ComponentTypeHandle<$$componentNameFull$$> compHandle;
             public ComponentTypeHandle<$$reactiveComponentNameFull$$> rCompHandle;
             public bool isTagComponent;
 
-            public void Execute( ArchetypeChunk batchInChunk, int batchIndex )
+            public void Execute( in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask )
             {
                 var rCompArrayPtr =
-                    InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr( batchInChunk, ref rCompHandle );
+                    InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr( chunk, ref rCompHandle );
                 
                 if( !isTagComponent ) {
                     var compsArrayPtr =
-                        InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( batchInChunk, ref compHandle );
-                    for ( int i = 0; i < batchInChunk.Count; i++ ) {
+                        InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( chunk, ref compHandle );
+                    var enumerator = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count); 
+                    while( enumerator.NextEntityIndex( out int i ) ) {
                         Execute(
                             ref InternalCompilerInterface
                                 .UnsafeGetRefToNativeArrayPtrElement<$$componentNameFull$$>( compsArrayPtr, i ),
@@ -385,7 +390,8 @@
                     }
                 } else {
                     var tempComp = new $$componentNameFull$$();
-                    for ( int i = 0; i < batchInChunk.Count; i++ ) {
+                    var enumerator = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count); 
+                    while( enumerator.NextEntityIndex( out int i ) ) {
                         Execute(
                             ref tempComp,
                             ref InternalCompilerInterface
@@ -457,7 +463,7 @@
         }
 
         [Unity.Burst.BurstCompile]
-        private struct ReactiveEntityCleanupJob : IJobEntityBatchWithIndex
+        private struct ReactiveEntityCleanupJob : IJobChunk
         {
             [ReadOnly]
             public EntityTypeHandle entityHandle;
@@ -465,25 +471,26 @@
             public ComponentTypeHandle<$$reactiveComponentNameFull$$> rCompHandle;
             public EntityCommandBuffer.ParallelWriter ecb;
 
-            public void Execute( ArchetypeChunk batchInChunk, int batchIndex, int indexOfFirstEntityInQuery )
+            public void Execute( in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask )
             {
-                var entities      = batchInChunk.GetNativeArray( entityHandle );
+                var entities      = chunk.GetNativeArray( entityHandle );
                 var rCompArrayPtr =
-                    InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( batchInChunk, ref rCompHandle );
-                for ( int i = 0; i < batchInChunk.Count; i++ ) {
+                    InternalCompilerInterface.UnsafeGetChunkNativeArrayReadOnlyIntPtr( chunk, ref rCompHandle );
+                var enumerator = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count); 
+                while( enumerator.NextEntityIndex( out int i ) ) {
                     Execute(
                         entities[i],
                         ref InternalCompilerInterface
                             .UnsafeGetRefToNativeArrayPtrElement<$$reactiveComponentNameFull$$>( rCompArrayPtr, i ),
                         ecb,
-                        indexOfFirstEntityInQuery );
+                        unfilteredChunkIndex );
                 }
             }
 
-            private static void Execute( Entity entity, ref $$reactiveComponentNameFull$$ rComp, EntityCommandBuffer.ParallelWriter ecb, int indexOfFirstEntityInQuery )
+            private static void Execute( Entity entity, ref $$reactiveComponentNameFull$$ rComp, EntityCommandBuffer.ParallelWriter ecb, int unfilteredChunkIndex )
             {
                 if( rComp.Value._AddedCheck == false )
-                    ecb.RemoveComponent<$$reactiveComponentNameFull$$>( indexOfFirstEntityInQuery, entity );
+                    ecb.RemoveComponent<$$reactiveComponentNameFull$$>( unfilteredChunkIndex, entity );
             }
         }
     }";

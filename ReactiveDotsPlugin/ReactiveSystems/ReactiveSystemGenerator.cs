@@ -105,6 +105,7 @@ namespace ReactiveDotsPlugin
             set.Add( "System.Collections.Generic" );
             set.Add( "Unity.Collections" );
             set.Add( "Unity.Entities" );
+            set.Add( "Unity.Burst.Intrinsics" );
             set.Add( "ReactiveDots" );
             return set;
         }
