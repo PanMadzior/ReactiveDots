@@ -39,7 +39,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.entities": {
-      "version": "1.0.0-exp.8",
+      "version": "1.0.0-exp.12",
       "depth": 0,
       "source": "registry",
       "dependencies": {

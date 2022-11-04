@@ -44,15 +44,15 @@
     <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Assets\ReactiveDots\ReactiveDots.dll" />
     <Analyzer Include="E:\Programs\Unity\2022.2.0b10\Editor\Data\Tools\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="E:\Programs\Unity\2022.2.0b10\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
-    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.8\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.EntityQuery.dll" />
-    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.8\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.SystemGenerator.dll" />
-    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.8\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.SystemAPIQueryBuilder.dll" />
-    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.8\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.LambdaJobs.dll" />
-    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.8\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.SystemContextSystemModule.dll" />
-    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.8\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.JobEntity.dll" />
-    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.8\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.AspectGenerator.dll" />
-    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.8\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.Common.dll" />
-    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.8\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.IdiomaticCSharpForEach.dll" />
+    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.12\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.EntityQuery.dll" />
+    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.12\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.SystemGenerator.dll" />
+    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.12\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.SystemAPIQueryBuilder.dll" />
+    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.12\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.LambdaJobs.dll" />
+    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.12\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.SystemContextSystemModule.dll" />
+    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.12\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.JobEntity.dll" />
+    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.12\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.AspectGenerator.dll" />
+    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.12\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.Common.dll" />
+    <Analyzer Include="E:\Projects\Gamedev\Unity\ReactiveDots\Library\PackageCache\com.unity.entities@1.0.0-exp.12\Unity.Entities\SourceGenerators\Unity.Entities.SourceGen.IdiomaticCSharpForEach.dll" />
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\ReactiveDots\Tests\SecondTestAssembly\OtherAssemblyTestComponent.cs" />
