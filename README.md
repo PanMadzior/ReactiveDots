@@ -6,7 +6,7 @@ Highly inspired by [Entitas](https://github.com/sschmid/Entitas-CSharp), ECS fra
 Current version is not battle-tested. It is not recommended to use it in production. Use at your own risk.
 
 #### Note from developer
-On daily basis I work with Entitas, where reactive systems are a core feature. From time to time in my spare time I experiment with DOTS. ReactiveDots is such an experiment. My goal here was to transfer my workflows from Entitas to DOTS.
+On daily basis I work with Entitas, where reactive systems are a core feature. From time to time, in my spare time, I experiment with DOTS. ReactiveDots is such an experiment. My goal here is to transfer my workflows from Entitas to DOTS.
 
 ## Table of contents
 1. [Installation](#installation)
@@ -28,15 +28,15 @@ Simply import ReactiveDots unity package from releases to your project. If there
 
 For source generators to work you have to have a fairly updated version of Visual Studio or Rider.
 
-Tested on **Unity 2020.3.31f1**, **Entities 0.50.0-preview.24** and **Rider 2022.1.1.**
+Tested on **Unity 2022.2.0b10**, **Entities 1.0.0-exp.12** and **Rider 2022.1.1.**
 
-Unit tests succeeded also on **Entities 0.50.1-preview.2** and **0.51.0-preview.32**.
+For Entities 0.50.0-preview.24 use ReactiveDots v0.2.0-preview.1.
 
 # Features
 You can play around with the implemented features in a sample project.
 
 ## Reactive Systems
-Add systems that iterate over the entities when their component is added/removed/changed since the last frame.
+Add systems that iterate over the entities when their component is added/removed/changed or enabled/disabled since the last frame.
 
 ```csharp
 // React when a MoveDirection component is added/removed/changed.
@@ -50,10 +50,7 @@ public partial class BounceCountSystem : SystemBase
     }
 
     protected override void OnUpdate()
-    {
-        // Update reactive data with auto-generated extension method.
-        Dependency = this.UpdateReactive( Dependency );
-        
+    {        
         Entities.ForEach( ( ref Bounces bounces, in MoveDirectionReactive moveDirReactive ) =>
         {
             // React only to the changes in the MoveDirection component
@@ -61,6 +58,9 @@ public partial class BounceCountSystem : SystemBase
             if ( !moveDirReactive.Value.Added && moveDirReactive.Value.Changed )
                 bounces.Value += 1;
         } ).ScheduleParallel();
+        
+        // Update reactive data with auto-generated extension method.
+        Dependency = this.UpdateReactive( Dependency );
     }
 }
 ```
@@ -71,21 +71,27 @@ You have to:
 1. Add a `[ReactiveSystem(typeof(A), typeof(B))]` attribute.
    1. Specify a component you want to react to in first argument (*A*).
    2. Specify a reactive data component (*B*) from step 2.
-2. Add a simple reactive data system state component with a field of type `ComponentReactiveData<T>`, where *T* is the type of the component you want to react to (*A*).
-3. Add `Dependency = this.UpdateReactive( Dependency );` at the beginning of the `OnUpdate()`.
+2. Add a simple reactive data cleanup component with a field of type `ComponentReactiveData<T>`, where *T* is the type of the component you want to react to (*A*).
+3. Add `Dependency = this.UpdateReactive( Dependency );` at the end of the `OnUpdate()`.
 
-Optionally specify a name of a component field you want to use when deciding whether the component changed its value or not. Set it with *FieldNameToCompare* argument: `[ReactiveSystem( typeof(A), typeof(B), FieldNameToCompare = "CustomField" )]`. Default is `"Value"`. 
+#### FieldNameToCompare
+Optionally, you can specify a name of a component field you want to use when deciding whether the component changed its value or not. Set it with *FieldNameToCompare* argument: `[ReactiveSystem( typeof(A), typeof(B), FieldNameToCompare = "CustomField" )]`. Default is `"Value"`.
+
+You can specify multiple fields by separating them with comma: `FieldNameToCompare = "Field_0,Field_1"`.
+
+For tag components use empty string: `FieldNameToCompare = ""`.
 
 ### How reactive systems work under the hood?
 
-Source generators adds extra code to manage systems. You can inspect it in your IDE. Easiest way is to go to the declaration of the auto-generated extension method `UpdateReactive()`. But overall idea works like this:
+Source generators adds extra code to manage systems. You can inspect it in your IDE. Easiest way is to go to the declaration of the auto-generated extension method `UpdateReactive()`. Overall idea works like this:
 - User marks system to be reactive system.
-- User adds `ISystemStateComponentData` component that will cache main component reactive data.
-- When the main component is added to any entity that hasn't got the cache component, the cache component is added to the entity in auto-generated foreach. Cache component `.Added` value is set to true and the actual value of the main component is cached in the `.PreviousValue` field.
-- Auto-generated parallel job (`IEntityBatchJob`) checks every update if the actual value of the main component is different than the cached `.PreviousValue`. If it is, `.Changed` field is set to true, otherwise to false. The actual value is yet again cached in the cache component.
-- If other auto-generated foreach finds an entity with the cache component but without the main one, it means that the component was removed or the entity was destroyed. In this case `.Removed` field in the cached component is set to true. In the next update the cache component will be removed aswell.
+- User adds `ICleanupComponentData` component that will cache main component reactive data.
+- When the main component is added to any entity that hasn't got the cache component, the cache component is added to the entity in auto-generated job. Cache component `.Added` value is set to true and the actual value of the main component is cached in the `.PreviousValue` field.
+- Auto-generated parallel job (`IJobChunk`) checks every update if the actual value of the main component is different than the cached `.PreviousValue`. If it is, `.Changed` field is set to true, otherwise to false. The actual value is yet again cached in the cache component.
+- If other auto-generated job finds an entity with the cache component but without the main one, it means that the component was removed or the entity was destroyed. In this case `.Removed` field in the cached component is set to true.
+- Enabling and disabling components also trigger `.Added` and `.Removed` states change.
 
-Actual and cached values are compared only on one specified field, `.Value` by default. If any other field is changed, the system does not take it as a change. It is something that might be fixed in future updates.
+Actual and cached values are compared only on one or more specified fields, `.Value` by default. If any other field is changed, the system does not take it as a change. For tag components, as they have no real value, nothing is compared and `.Changed` is always set to `false`.
 
 You should be aware, that the cache component holds duplicate of the whole main component. If there are maaany reactive systems (and components they manage), it might have a bad impact on your game's memory usage.
 
@@ -93,7 +99,7 @@ Default way is to create a new reactive system when you want to know when the co
 
 ### Reactive update methods
 
-There are several update methods for reactive systems. They differences are mainly how they manage structural changes when adding or removing the cache component.
+There are several update methods for reactive systems. Their differences are mainly how they manage structural changes when adding or removing the cache component.
 
 ```csharp
 // Update reactive data in parallel jobs using ECB from EndSimulationEntityCommandBufferSystem.
@@ -210,13 +216,13 @@ Event systems are built on top of the reactive systems. Check [how reactive syst
 Event listener components are managed components because they hold interface instance references. Therefore invoking interface methods have to be done on the main thread. Invoking them in jobs doesn't make much sense anyway. Bear in mind that many events, especially these which fires frequently, may have bad impact on your game performance. Also, be aware that event systems make sync points by default.
 
 # Known issues and limitations
-- You can only react to changes of simple unmanaged `IComponentData` components and maybe `ISystemStateComponentData`. Managed components won't work. There is no support for buffers either. `IComponentData` tags are not yet supported as they do not have any field. They need a custom generator.
-- Reactive systems does not work as intended when they are not marked as `[AlwaysUpdateSystem]`. Because of that, `[ReactiveSystem]` attribute derives from it, so you don't have to remember about that. I am not sure why is this a problem since systems register entity queries properly. Auto-generated jobs may be a problem here.
+- You can only react to changes of simple unmanaged `IComponentData` components and maybe `ICleanupComponentData`. Managed components won't work. There is no support for buffers either.
 - Reactive system's internal `IEntityBatchJob`, that checks for component changes, use some unity internal methods (like `InternalCompilerInterface.UnsafeGetChunkNativeArrayIntPtr`) for getting pointers to the component arrays. This way the job's performance is the same (or almost the same) as unity generated foreaches. I'm not sure if I should use said methods or something different. It works tho.
 - `EventType` in event attributes is not yet implemented. All events are generated with `EventType.All` for now.
 - Reactive components have to be written manually. You cannot generate components if you want to use them in ecs foreaches. Unity source generators do some magic on the component types under the hood. This forces some extra boilerplate code.
 - Some of the generated code are static singletons which hurt my heart. Would be great to make them more manageable and possibly without singletons.
-- Some of the generated code needs some cleaning.
+- Some of the generated code needs refactor.
+- Only systems deriving from `SystemBase` are supported. `ISystem`-based are not yet supported.
 - ...and for sure there is some more problems I am not yet aware of.
 
 # Planned features
