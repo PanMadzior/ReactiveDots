@@ -1,7 +1,7 @@
 # ReactiveDots changelog
 
 ## v0.3.0
-04 Nov 2022
+05 Nov 2022
 
 This update focuses on adding support for a new Entities version and component types (tags and enableable).  
 
